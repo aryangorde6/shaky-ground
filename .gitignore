@@ -1,0 +1,10 @@
+# secrets
+.env
+
+# python
+.venv/
+__pycache__/
+*.pyc
+
+# downloaded data and API caches (rebuilt by the loaders)
+data/
