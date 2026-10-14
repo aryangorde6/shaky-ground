@@ -15,6 +15,7 @@ import time
 from falkordb import Graph
 
 from . import db, openalex, retractionwatch
+from .reliance import WEIGHTS
 
 BATCH = 250
 
@@ -26,8 +27,8 @@ SET p.doi = row.doi, p.title = row.title, p.year = row.year, p.cited_by = row.ci
     p.retracted = coalesce(p.retracted, false) OR row.oa_retracted
 """
 
-# New edges start as UNKNOWN (reliance 0.3) until there is evidence. A retraction
-# notice cites a paper only to retract it, so that edge is CRITICAL (reliance 0).
+# New edges start as UNKNOWN until there is evidence. A retraction
+# notice cites a paper only to retract it, so that edge is CRITICAL.
 # ON CREATE keeps a later judgment from being overwritten by a reload.
 LINK_CITATIONS = """
 MATCH (a:Paper)
@@ -36,7 +37,7 @@ MATCH (b:Paper {id: ref})
 MERGE (a)-[c:CITES]->(b)
 ON CREATE SET
     c.cls = CASE a.type WHEN 'retraction' THEN 'CRITICAL' ELSE 'UNKNOWN' END,
-    c.reliance = CASE a.type WHEN 'retraction' THEN 0.0 ELSE 0.3 END
+    c.reliance = CASE a.type WHEN 'retraction' THEN $critical ELSE $unknown END
 RETURN count(c)
 """
 
@@ -64,7 +65,8 @@ def upsert_papers(g: Graph, papers: list[dict]) -> int:
 
 def link_citations(g: Graph) -> int:
     """Create every CITES edge whose two papers are both loaded. Returns the edge count."""
-    return g.query(LINK_CITATIONS).result_set[0][0]
+    weights = {"critical": WEIGHTS["CRITICAL"], "unknown": WEIGHTS["UNKNOWN"]}
+    return g.query(LINK_CITATIONS, weights).result_set[0][0]
 
 
 def link_retractions(g: Graph) -> int:
