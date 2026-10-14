@@ -25,13 +25,30 @@ cp .env.example .env
 # 3. Python dependencies, then create the graph's indexes
 uv sync
 uv run python -m shaky.db
+
+# 4. Load a paper, the papers it cites and the papers that cite it
+#    (Lesné et al. 2006, Nature, retracted 2024: ~2,800 papers, ~30 OpenAlex credits)
+uv run python -m shaky.load W2075481535
 ```
 
 FalkorDB Browser: http://localhost:3000
 
+Loads are idempotent (every write is a `MERGE` keyed by ID) and API responses are cached in `data/`, so a second run sends no requests and changes nothing.
+
 ## Graph model
 
-*(to be filled in)*
+```
+(:Paper {id, doi, title, year, cited_by, type, is_review, venue, oa_url, retracted, refs})
+(:Paper)-[:CITES {cls, reliance}]->(:Paper)
+(:Retraction {record_id, date, nature, reason, notice_doi})-[:RETRACTS]->(:Paper)
+```
+
+- `Paper.id` is the OpenAlex work ID. `refs` lists the IDs of every work the paper cites; a `CITES` edge exists only when both papers are loaded, so the rest of `refs` is the frontier still to explore.
+- `CITES.cls` is how much the citing paper relies on the cited one: `FOUNDATIONAL` 1.0, `SUPPORTING` 0.6, `BACKGROUND` 0.15, `CRITICAL` 0, `UNKNOWN` 0.3 (no evidence yet). A retraction notice citing the paper it retracts is `CRITICAL`.
+- `retracted` comes from OpenAlex or from a Retraction Watch notice. A paper with a `RETRACTS` edge is confirmed by Retraction Watch.
+- No author names, institutions or countries are stored: Shaky Ground scores papers, never people.
+
+Data: [Retraction Watch database](https://api.labs.crossref.org/data/retractionwatch) (via Crossref) and [OpenAlex](https://openalex.org).
 
 ## Cypher queries and algorithms
 

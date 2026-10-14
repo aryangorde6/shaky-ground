@@ -38,8 +38,24 @@ def ensure_schema(g: Graph) -> list[tuple[str, str]]:
     return created
 
 
+def summary(g: Graph) -> dict:
+    """Counts to check after every load. `duplicate_ids` must always be 0."""
+    def one(q):
+        return g.query(q).result_set[0][0]
+    return {
+        "graph": config.GRAPH_NAME,
+        "papers": one("MATCH (p:Paper) RETURN count(p)"),
+        "duplicate_ids": one("MATCH (p:Paper) RETURN count(p) - count(DISTINCT p.id)"),
+        "retracted_papers": one("MATCH (p:Paper {retracted: true}) RETURN count(p)"),
+        "retractions": one("MATCH (r:Retraction) RETURN count(r)"),
+        "cites": one("MATCH ()-[c:CITES]->() RETURN count(c)"),
+        "retracts": one("MATCH ()-[r:RETRACTS]->() RETURN count(r)"),
+    }
+
+
 if __name__ == "__main__":
     g = graph()
     created = ensure_schema(g)
     print(f"graph '{config.GRAPH_NAME}': created {created or 'nothing'}; "
           f"indexes now {sorted(existing_indexes(g))}")
+    print(summary(g))

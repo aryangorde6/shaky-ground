@@ -17,4 +17,5 @@ S2_API_KEY = os.getenv("S2_API_KEY", "")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 
-DATA_DIR = Path(os.getenv("DATA_DIR", "data"))
+# Downloads and the API cache (gitignored). Defaults to shaky-ground/data.
+DATA_DIR = Path(os.getenv("DATA_DIR") or Path(__file__).resolve().parent.parent / "data")
