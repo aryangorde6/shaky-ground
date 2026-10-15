@@ -175,9 +175,30 @@ def _vote(judge: str, groups: list, stats: dict) -> dict:
 
 
 def judge_carry(g: Graph, root_id: str, judges=JUDGES) -> dict:
+    """Judge every strong link into a paper that already builds on the root (see TO_JUDGE)."""
     todo = g.ro_query(TO_JUDGE, {"root": root_id, "t": risk.BUILDS_ON, "version": f":c{VERSION}"}).result_set
     stats = {"to_judge": len(todo), "carries": 0, "does_not": 0, "not_shown": 0, "not_judged": 0, "calls": 0}
-    groups = _groups(g, root_id, todo, stats)
+    return judge_groups(g, root_id, _groups(g, root_id, todo, stats), judges, stats)
+
+
+# One given link B -> X, as the "what B took" part of a group (for chains that were not propagated).
+LINK = """
+MATCH (b:Paper {id: $b})-[u:CITES]->(x:Paper {id: $x})
+RETURN b.title, x.id, x.title, u.cls, coalesce(u.contexts, [u.evidence])
+"""
+
+
+def group(g: Graph, b: str, x: str, citers: list) -> tuple | None:
+    """(B, B's link to X, citers) for judge_groups; citers are (src, title, contexts)."""
+    rows = g.ro_query(LINK, {"b": b, "x": x}).result_set
+    return (b, rows[0], citers) if rows else None
+
+
+def judge_groups(g: Graph, root_id: str, groups: list, judges=JUDGES, stats: dict | None = None) -> dict:
+    """Both judges vote on every citer in groups; the combined answers are saved for root_id."""
+    if stats is None:
+        stats = {"to_judge": sum(len(c) for _, _, c in groups), "carries": 0, "does_not": 0, "not_shown": 0,
+                 "not_judged": 0, "calls": 0}
     votes = {judge: _vote(judge, groups, stats) for judge in judges}
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     rows = []

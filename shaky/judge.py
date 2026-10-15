@@ -72,7 +72,7 @@ def classify(j: dict, sentence: str) -> str:
 
 TO_JUDGE = """
 MATCH (a:Paper)-[c:CITES]->(b:Paper {id: $cited})
-WHERE c.contexts IS NOT NULL AND c.judged_by IS NULL
+WHERE c.contexts IS NOT NULL AND c.judged_by IS NULL AND ($only IS NULL OR a.id IN $only)
 RETURN a.id, a.title, c.contexts, c.intents, c.influential
 ORDER BY a.cited_by DESC
 LIMIT $limit
@@ -127,12 +127,14 @@ def _checked(reply: dict, batch: list) -> tuple[list[dict], int]:
     return rows, len(batch) - len(rows)
 
 
-def judge_citations(g: Graph, cited_id: str, providers, batch_size: int, limit: int) -> dict:
+def judge_citations(g: Graph, cited_id: str, providers, batch_size: int, limit: int,
+                    only_from: list[str] | None = None) -> dict:
+    """Judge the unjudged citations of cited_id that have sentences (only those from only_from, if given)."""
     found = g.ro_query("MATCH (p:Paper {id: $id}) RETURN p.title, p.year, p.venue", {"id": cited_id}).result_set
     if not found:
         raise SystemExit(f"{cited_id}: not in the graph")
     cited = dict(zip(("title", "year", "venue"), found[0]))
-    todo = g.ro_query(TO_JUDGE, {"cited": cited_id, "limit": limit}).result_set
+    todo = g.ro_query(TO_JUDGE, {"cited": cited_id, "limit": limit, "only": only_from}).result_set
     stats = {"to_judge": len(todo), "judged": 0, "not_judged": 0, "calls": 0}
     for start in range(0, len(todo), batch_size):
         batch = todo[start:start + batch_size]

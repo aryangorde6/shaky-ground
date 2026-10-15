@@ -37,7 +37,10 @@ CAPPED = "CASE WHEN c.reliance < $passing THEN c.reliance ELSE $passing END"
 VARIANTS = {   # property: (which links count, the weight of link c)
     "risk": ("c.reliance > 0", f"CASE WHEN {NOT_CARRIES} THEN {CAPPED} ELSE c.reliance END"),
     "risk_proven": ("c.reliance > 0 AND c.cls <> 'UNKNOWN'", f"CASE WHEN {CARRIES} THEN c.reliance ELSE {CAPPED} END"),
+    # the most a chain could be if every link without evidence turned out FOUNDATIONAL (chain() only)
+    "upper": ("c.reliance > 0", f"CASE WHEN c.cls = 'UNKNOWN' THEN 1.0 WHEN {NOT_CARRIES} THEN {CAPPED} ELSE c.reliance END"),
 }
+PROPAGATED = ("risk", "risk_proven")
 
 PROPAGATE = """
 MATCH (a:Paper)-[c:CITES]->(b:Paper)
@@ -56,8 +59,8 @@ ORDER BY risk DESC
 LIMIT 1
 RETURN risk,
        [n IN nodes(p) | {{id: n.id, title: n.title, year: n.year, retracted: n.retracted}}],
-       [c IN relationships(p) | {{cls: c.cls, reliance: c.reliance, evidence: c.evidence,
-                                  carries: c.carries, carry_evidence: c.carry_evidence}}]
+       [c IN relationships(p) | {{cls: c.cls, reliance: c.reliance, evidence: c.evidence, judged_by: c.judged_by,
+                                  carries: c.carries, carry_evidence: c.carry_evidence, carry_votes: c.carry_votes}}]
 """
 
 
@@ -75,7 +78,8 @@ def propagate(g: Graph, root_id: str, hops: int = MAX_HOPS) -> dict:
                    {"id": root_id}).result_set:
         raise ValueError(f"{root_id} is not in the graph")
     passes = {}
-    for prop, (counts, weight) in VARIANTS.items():
+    for prop in PROPAGATED:
+        counts, weight = VARIANTS[prop]
         query = PROPAGATE.format(prop=prop, counts=counts, weight=weight.format(end="b"))
         passes[prop] = [g.query(query, _params(root_id)).result_set[0][0] for _ in range(hops)]
     g.query("MATCH (p:Paper) WHERE p.risk IS NOT NULL SET p.risk_root = $id", {"id": root_id})
@@ -84,9 +88,9 @@ def propagate(g: Graph, root_id: str, hops: int = MAX_HOPS) -> dict:
     return {"root": root_id, "updated_per_pass": passes, **tiers(g, root_id)}
 
 
-def chain(g: Graph, paper_id: str, root_id: str, proven: bool = True, hops: int = MAX_HOPS) -> dict | None:
-    """The paper's riskiest chain to the root (proven: only links with evidence), or None."""
-    counts, weight = VARIANTS["risk_proven" if proven else "risk"]
+def chain(g: Graph, paper_id: str, root_id: str, variant: str = "risk_proven", hops: int = MAX_HOPS) -> dict | None:
+    """The paper's riskiest chain to the root, scored as one of VARIANTS, or None if there is none."""
+    counts, weight = VARIANTS[variant]
     query = CHAIN.format(hops=hops, counts=counts, weight=weight.format(end="endNode(c)"))
     rows = g.ro_query(query, {"id": paper_id, **_params(root_id)}, timeout=10_000).result_set
     if not rows:
@@ -99,13 +103,14 @@ def chain(g: Graph, paper_id: str, root_id: str, proven: bool = True, hops: int 
 #   builds_on  proven: some chain has every link judged FOUNDATIONAL or SUPPORTING (:Contaminated)
 #   passing    proven chains exist, but each one has a BACKGROUND link
 #   not_shown  no chain has evidence on every link yet
-# disputes counts the direct citers whose link is CRITICAL; they carry no risk at all.
+# disputes counts the direct citers whose link is CRITICAL; they carry no risk at all. Retraction
+# notices are left out: a notice copies its paper's reference list, so it "cites" the root without disputing it.
 TIERS = """
 MATCH (p:Paper) WHERE p.risk_root = $id AND p.id <> $id
 WITH sum(CASE WHEN p.risk_proven >= $t THEN 1 ELSE 0 END) AS builds_on,
      sum(CASE WHEN p.risk_proven > 0 AND p.risk_proven < $t THEN 1 ELSE 0 END) AS passing,
      sum(CASE WHEN coalesce(p.risk_proven, 0) = 0 THEN 1 ELSE 0 END) AS not_shown
-OPTIONAL MATCH (d:Paper)-[:CITES {cls: 'CRITICAL'}]->(:Paper {id: $id})
+OPTIONAL MATCH (d:Paper)-[:CITES {cls: 'CRITICAL'}]->(:Paper {id: $id}) WHERE d.type <> 'retraction'
 RETURN builds_on, passing, not_shown, count(DISTINCT d)
 """
 
@@ -126,7 +131,8 @@ RETURN a.id, max(reduce(r = 1.0, c IN relationships(p) | r * {weight}))
 def check(g: Graph, root_id: str, hops: int = MAX_HOPS) -> dict:
     """Compare the stored risk numbers with brute force over every chain. Returns mismatches per number."""
     out = {}
-    for prop, (counts, weight) in VARIANTS.items():
+    for prop in PROPAGATED:
+        counts, weight = VARIANTS[prop]
         query = BRUTE.format(hops=hops, counts=counts, weight=weight.format(end="endNode(c)"))
         brute = dict(g.ro_query(query, _params(root_id), timeout=300_000).result_set)
         stored = dict(g.ro_query(f"MATCH (a:Paper) WHERE a.id <> $root AND a.risk_root = $root AND a.{prop} > 0 "
