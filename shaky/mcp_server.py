@@ -34,11 +34,13 @@ TOOLS = [
      "description": ("Does this paper rest on retracted work? Checks its references and their references (depth 2) "
                      "against Retraction Watch and OpenAlex, and judges each link from the citing sentences. Returns a "
                      "verdict (RESTS ON RETRACTED WORK, NOT PROVEN, CITES RETRACTED WORK, NO RETRACTED WORK FOUND, "
-                     "CLEAN · DEPTH 2, NO DATA), each retracted paper in reach with its chain and quoted evidence, and "
-                     "how much could be checked. Returns the latest stored check unless fresh is true; a new check "
-                     "can take a few minutes."),
+                     "CLEAN · DEPTH 2, NO DATA), each retracted paper in reach, whether the paper is retracted itself, "
+                     "and how much could be checked. With evidence true, each chain comes with the citing sentences "
+                     "and the model that judged each link. Returns the latest stored check unless fresh is true; a "
+                     "new check can take a few minutes."),
      "inputSchema": {"type": "object", "properties": {
          "paper": PAPER,
+         "evidence": {"type": "boolean", "description": "Include every chain with its quoted sentences (longer)", "default": False},
          "fresh": {"type": "boolean", "description": "Run a new check even if one is stored", "default": False}},
          "required": ["paper"]}},
     {"name": "retraction_blast_radius",
@@ -67,24 +69,29 @@ def graph():      # connected on first use, so the protocol can be tested withou
     return db.graph()
 
 
-def _latest_check(pid: str) -> dict | None:
-    for c in views.checks(graph(), n=200):
-        if c["paper"] == pid and c["has_result"]:
-            return views.check_result(graph(), c["investigation"])
-    return None
+def _brief(result: dict) -> dict:
+    """A check without its chains: what an agent needs to decide whether to cite."""
+    out = {k: result[k] for k in ("paper", "verdict", "paper_retracted", "coverage", "why", "details_missing",
+                                  "investigation", "credits") if k in result}
+    out["retracted_ancestors"] = [
+        {"id": a.get("id"), "title": a.get("title"), "year": a.get("year"), "tier": a.get("tier"),
+         "cited_directly_as": a.get("direct_link"), "links": len((a.get("chain") or {}).get("links") or [])}
+        for a in result.get("retracted_ancestors") or []]
+    out["evidence"] = "call again with evidence=true, or explain_chain, for the citing sentences"
+    return out
 
 
-def check_foundations(paper: str, fresh: bool = False) -> dict:
-    stored = None
+def check_foundations(paper: str, evidence: bool = False, fresh: bool = False) -> dict:
+    result, stored = None, False
     if not fresh:
         try:
-            stored = _latest_check(views.find(graph(), paper))
+            result = views.latest_check(graph(), views.find(graph(), paper))
+            stored = result is not None
         except views.NotFound:
-            stored = None
-    if stored:
-        return {**stored, "meaning": foundation.VERDICTS.get(stored["verdict"]), "stored": True}
-    result = views.run_check(graph(), paper)
-    return {**result, "meaning": foundation.VERDICTS.get(result["verdict"]), "stored": False}
+            pass
+    if result is None:
+        result = views.run_check(graph(), paper)
+    return {**(result if evidence else _brief(result)), "meaning": foundation.VERDICTS.get(result["verdict"]), "stored": stored}
 
 
 def retraction_blast_radius(paper: str, limit: int = 20) -> dict:

@@ -46,6 +46,21 @@ Also cited: https://doi.org/10.1016/j.expneurol.2016.06.006. Again: 10.1016/J.NE
         with self.assertRaises(resolve.ResolveError):
             foundation.check_list(None, "just some words, no references")
 
+    def test_read_only_list(self):
+        # stored checks are reused; a reference never checked is NOT CHECKED, never cleared; a list that
+        # cites a retracted paper directly is at least CITES RETRACTED WORK
+        clean = {"paper": {"id": "W1", "title": "One", "year": 2001}, "verdict": "NO RETRACTED WORK FOUND",
+                 "paper_retracted": False, "investigation": "aa", "retracted_ancestors": []}
+        retracted = {"id": "W2", "title": "Two", "year": 2006, "retracted": True}
+        r = foundation.check_list(None, "10.1000/one 10.1000/two 10.1000/three\n@book{x, title={No DOI}}",
+                                  stored=lambda doi: clean if doi == "10.1000/one" else None,
+                                  known=lambda doi: retracted if doi == "10.1000/two" else None, run=False)
+        self.assertEqual([e["verdict"] for e in r["entries"]], ["NO RETRACTED WORK FOUND", "NOT CHECKED", "NOT CHECKED"])
+        self.assertEqual((r["reused"], r["without_doi"], r["cited_papers_retracted"]), (1, 1, 1))
+        self.assertEqual(r["verdict"], "CITES RETRACTED WORK")
+        r = foundation.check_list(None, "10.1000/one", stored=lambda doi: clean, run=False)
+        self.assertEqual(r["verdict"], "NO RETRACTED WORK FOUND")
+
 
 class Reliance(unittest.TestCase):
     def test_count_refs(self):

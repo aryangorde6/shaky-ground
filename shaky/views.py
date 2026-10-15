@@ -253,6 +253,38 @@ def check_result(g: Graph, inv: str) -> dict:
             "retracted_ancestors": [], "details_missing": "this check was run before results were stored; run it again"}
 
 
+def latest_check(g: Graph, pid: str) -> dict | None:
+    """The latest stored foundation check of a paper that has a result, or None."""
+    for c in checks(g, n=200):
+        if c["paper"] == pid and c["has_result"]:
+            return check_result(g, c["investigation"])
+    return None
+
+
+def check_list(g: Graph, text: str, credits: int = 200) -> dict:
+    """A reference list: each DOI's latest stored check, and a new check for the rest when runs are
+    allowed (otherwise the rest are NOT CHECKED)."""
+    latest = {c["paper"]: c["investigation"] for c in checks(g, n=200) if c["has_result"]}
+
+    def stored(doi: str) -> dict | None:
+        try:
+            pid = find(g, doi)
+        except (NotFound, resolve.ResolveError):
+            return None
+        return check_result(g, latest[pid]) if pid in latest else None
+
+    def known(doi: str) -> dict | None:
+        try:
+            return _papers(g, [find(g, doi)]).popitem()[1]
+        except (NotFound, resolve.ResolveError, KeyError):
+            return None
+
+    if not config.ALLOW_RUNS:
+        return foundation.check_list(g, text, stored=stored, known=known, run=False)
+    with _writes:
+        return foundation.check_list(g, text, max_credits=credits, stored=stored)
+
+
 def run_check(g: Graph, text: str, credits: int = 50) -> dict:
     """A new foundation check (writes: loads references, judges citations). Needs ALLOW_RUNS."""
     if not config.ALLOW_RUNS:

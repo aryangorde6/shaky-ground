@@ -56,41 +56,59 @@ function setURL(params) {
 // ---------- graph drawing ----------
 function cyStyle() {
   const c = css;
+  const cond = '"Barlow Condensed", "Arial Narrow", sans-serif', serif = '"Source Serif 4", Georgia, serif';
+  // labels that must stay readable with the whole graph in view: never drawn smaller than px on screen
+  const steady = (px) => () => Math.max(px, px / (state.cy ? state.cy.zoom() : 1));
   return [
     { selector: "node", style: {
-        width: "data(size)", height: "data(size)", "background-color": c("--passing"), "border-width": 0,
-        label: "", "font-size": 11, color: c("--ink"), "text-valign": "bottom", "text-margin-y": 4,
-        "text-wrap": "wrap", "text-max-width": 150, "text-background-color": c("--bg"),
-        "text-background-opacity": 0.85, "text-background-padding": 2, "text-background-shape": "roundrectangle",
-        "transition-property": "opacity", "transition-duration": 0.15 } },
+        width: "data(size)", height: "data(size)", "background-color": c("--passing"), "border-width": 1.5,
+        "border-color": c("--ink"), label: "", "font-family": cond, "font-size": 14, "font-weight": 700, color: c("--ink"),
+        "text-valign": "bottom", "text-margin-y": 6, "text-wrap": "wrap", "text-max-width": 170,
+        "text-background-color": c("--surface"), "text-background-opacity": 1, "text-background-padding": 3,
+        "text-background-shape": "rectangle", "text-border-width": 1.5, "text-border-color": c("--ink"), "text-border-opacity": 1,
+        "z-index-compare": "manual", "z-index": 2, "transition-property": "opacity", "transition-duration": 0.15 } },
     { selector: "node.builds_on", style: { "background-color": c("--builds") } },
     { selector: "node.passing", style: { "background-color": c("--passing") } },
     { selector: "node.not_shown", style: { "background-color": c("--surface"), "border-width": 1.5,
         "border-style": "dashed", "border-color": c("--unknown") } },
-    { selector: "node.disputes", style: { "background-color": c("--disputes"), "border-width": 0 } },
+    { selector: "node.disputes", style: { "background-color": c("--disputes") } },
     { selector: "node.retracted", style: { "background-color": c("--retracted"), "border-width": 3,
         "border-style": "solid", "border-color": c("--retracted-ink"), color: c("--retracted-ink") } },
-    { selector: "node.subject", style: { "background-color": c("--ink"), width: 46, height: 46, "font-weight": 700, "font-size": 13,
-        "text-max-width": 220 } },
-    { selector: "node.root", style: { width: 66, height: 66, label: "data(short)", "font-size": 13,
-        "font-weight": 700, "text-max-width": 220, color: c("--ink") } },
+    { selector: "node.subject", style: { "background-color": c("--ink"), width: 46, height: 46, "font-size": 15,
+        "text-max-width": 230 } },
+    { selector: "node.root", style: { width: 70, height: 70, label: "data(short)", "font-family": serif, "font-size": steady(15),
+        "font-weight": 600, "text-max-width": steady(240), color: c("--retracted-ink"), "border-width": 7, "border-style": "double",
+        "border-color": c("--ink"), "text-border-color": c("--retracted"), "text-border-width": 2.5, "text-margin-y": steady(9) } },
+    // isoseismal rings: chain length 1, 2, 3 around the epicentre
+    { selector: "node.ring", style: { width: "data(d)", height: "data(d)", "background-opacity": 0, "border-width": 1.5,
+        "border-style": "dashed", "border-color": c("--ink"), "border-opacity": 0.3, events: "no", "z-index": 0 } },
+    { selector: "node.ringlabel", style: { width: 1, height: 1, "border-width": 0, label: "data(label)", "text-halign": (e) => e.data("ha"), "text-valign": (e) => e.data("va"), "text-wrap": "none",
+        "text-margin-y": 0, "font-size": steady(13), color: c("--muted"), "text-background-color": c("--bg"), "text-border-width": 0,
+        "text-background-padding": 3 } },
     { selector: "edge", style: {
         width: "mapData(reliance, 0, 1, 1, 6)", "line-color": c("--passing"), "target-arrow-color": c("--passing"),
-        "target-arrow-shape": "triangle", "arrow-scale": 0.75, "curve-style": "bezier", opacity: 0.85,
-        "transition-property": "opacity", "transition-duration": 0.15 } },
+        "target-arrow-shape": "triangle", "arrow-scale": 0.8, "curve-style": "bezier", opacity: 0.85,
+        "z-index-compare": "manual", "z-index": 1, "transition-property": "opacity", "transition-duration": 0.15 } },
     { selector: "edge.FOUNDATIONAL", style: { "line-color": c("--retracted"), "target-arrow-color": c("--retracted") } },
     { selector: "edge.SUPPORTING", style: { "line-color": c("--builds"), "target-arrow-color": c("--builds") } },
     { selector: "edge.CRITICAL", style: { width: 2.5, "line-color": c("--disputes"), "target-arrow-color": c("--disputes") } },
     { selector: "edge.UNKNOWN", style: { "line-style": "dashed", "line-dash-pattern": [6, 4],
         "line-color": c("--unknown"), "target-arrow-color": c("--unknown") } },
     { selector: "edge.nocarry", style: { "line-style": "dotted", opacity: 0.55 } },
+    // reference-list view: the list's own links, and each reference's verdict as one summary link
+    { selector: "node.listnode", style: { events: "no" } },
+    { selector: "edge.listlink", style: { width: 1.5, "line-color": c("--passing"), "target-arrow-color": c("--passing"), events: "no" } },
+    { selector: "edge.sum", style: { width: 5, "line-color": c("--retracted"), "target-arrow-color": c("--retracted") } },
+    { selector: "edge.sum.notproven", style: { width: 3, "line-style": "dashed", "line-dash-pattern": [7, 4],
+        "line-color": c("--builds"), "target-arrow-color": c("--builds") } },
+    { selector: "edge.sum.cites", style: { width: 1.5, "line-color": c("--passing"), "target-arrow-color": c("--passing") } },
     { selector: "edge.offchain", style: { opacity: 0.16, width: 1 } },
     { selector: ".hidden", style: { display: "none" } },
     { selector: ".faded", style: { opacity: 0.1 } },
     { selector: "node.hl", style: { label: "data(short)", "z-index": 10, opacity: 1 } },
-    { selector: "edge.hl", style: { opacity: 1, "z-index": 10 } },
-    { selector: "node:selected", style: { "overlay-color": c("--focus"), "overlay-opacity": 0.18, "overlay-padding": 7 } },
-    { selector: "edge:selected", style: { "overlay-color": c("--focus"), "overlay-opacity": 0.18, "overlay-padding": 4 } },
+    { selector: "edge.hl", style: { opacity: 1, "z-index": 9 } },
+    { selector: "node:selected", style: { "overlay-color": c("--focus"), "overlay-opacity": 0.2, "overlay-padding": 7 } },
+    { selector: "edge:selected", style: { "overlay-color": c("--focus"), "overlay-opacity": 0.2, "overlay-padding": 4 } },
   ];
 }
 
@@ -106,14 +124,17 @@ function radial(nodes) {
   for (const n of nodes) (rings[n.hops ?? 3] ||= []).push(n);
   const rank = (n) => n.retracted ? 0 : n.tier === "builds_on" ? 1 : n.disputes ? 2 : n.tier === "passing" ? 3 : 4;
   pos.set(rings[0][0].id, { x: 0, y: 0, a: 0 });
+  pos.radii = [];
   const r1 = (rings[1] || []).sort((a, b) => rank(a) - rank(b) || (b.cited_by || 0) - (a.cited_by || 0));
   let R = Math.max(240, (r1.length * 34) / (2 * Math.PI));
+  if (r1.length) pos.radii.push({ k: 1, R });
   r1.forEach((n, i) => {
     const a = -Math.PI / 2 + (2 * Math.PI * i) / r1.length;
     pos.set(n.id, { x: R * Math.cos(a), y: R * Math.sin(a), a });
   });
   for (const k of Object.keys(rings).map(Number).filter((k) => k > 1).sort()) {
     R += 190;
+    pos.radii.push({ k, R });
     const gap = Math.min((2 * Math.PI) / rings[k].length, 30 / R);
     const groups = new Map();
     for (const n of rings[k]) (groups.get(n.next) || groups.set(n.next, []).get(n.next)).push(n);
@@ -125,6 +146,20 @@ function radial(nodes) {
     want.sort((p, q) => p.a - q.a);
     for (let i = 1; i < want.length; i++) want[i].a = Math.max(want[i].a, want[i - 1].a + gap);
     for (const { n, a } of want) pos.set(n.id, { x: R * Math.cos(a), y: R * Math.sin(a), a });
+  }
+  // each ring's label goes just outside it, at the angle farthest from the papers drawn near it
+  const angles = (k) => (rings[k] || []).map((n) => pos.get(n.id).a);
+  for (const ring of pos.radii) {
+    const near = angles(ring.k + 1).length ? angles(ring.k + 1) : angles(ring.k);
+    let best = Math.PI / 2, bestGap = -1;
+    for (let i = 0; i < 72; i++) {
+      const a = (2 * Math.PI * i) / 72;
+      const gap = Math.min(...near.map((b) => Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b)))), Math.PI);
+      if (gap > bestGap + 1e-9) { best = a; bestGap = gap; }
+    }
+    const cx = Math.cos(best), cy = Math.sin(best);    // the label grows away from the ring
+    ring.label = { x: (ring.R + 24) * cx, y: (ring.R + 24) * cy,
+                   ha: cx > 0.35 ? "right" : cx < -0.35 ? "left" : "center", va: cy > 0.35 ? "bottom" : cy < -0.35 ? "top" : "center" };
   }
   return pos;
 }
@@ -138,9 +173,11 @@ function ensureCy() {
   cy.on("tap", "edge", (e) => onEdge(e.target));
   cy.on("tap", (e) => { if (e.target === cy) clearFocus(); });
   cy.on("mouseover", "node", (e) => tip(e.target, clean(e.target.data("title")) + (e.target.data("year") ? ` (${e.target.data("year")})` : "")));
-  cy.on("mouseover", "edge", (e) => tip(e.target, `${e.target.data("cls")} · weight ${e.target.data("reliance")}${e.target.data("carries") === false ? " · does not carry it on" : ""}`));
+  cy.on("mouseover", "edge", (e) => tip(e.target, e.target.data("tier") ? `${e.target.data("tier")}: click to open this reference's check`
+    : `${e.target.data("cls")} · weight ${e.target.data("reliance")}${e.target.data("carries") === false ? " · does not carry it on" : ""}`));
   cy.on("mouseout", () => { $("#tip").hidden = true; });
   cy.on("viewport", () => { $("#tip").hidden = true; });
+  cy.on("zoom", () => cy.$(".root, .ring").updateStyle());
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => cy.style(cyStyle()));
   state.cy = cy;
   return cy;
@@ -165,6 +202,13 @@ function drawBlast(v) {
     els.push({ group: "nodes", data: { ...n, size: nodeSize(n), short: short(n.title, n.hops === 0 ? 70 : 44) },
                position: pos.get(n.id), classes: classes.filter(Boolean).join(" ") });
   }
+  const ringLabel = { 1: "cites it directly", 2: "2 links away", 3: "3 links away" };
+  for (const { k, R, label } of pos.radii) {
+    els.push({ group: "nodes", data: { id: `ring-${k}`, d: 2 * R }, position: { x: 0, y: 0 }, classes: "ring",
+               selectable: false, grabbable: false });
+    els.push({ group: "nodes", data: { id: `ring-${k}-label`, label: (ringLabel[k] || `${k} links away`).toUpperCase(), ha: label.ha, va: label.va },
+               position: { x: label.x, y: label.y }, classes: "ring ringlabel", selectable: false, grabbable: false });
+  }
   for (const e of v.edges) {
     const classes = [e.cls, e.on_chain ? "onchain" : "offchain", e.carries === false ? "nocarry" : ""];
     els.push({ group: "edges", data: { ...e, id: `${e.source}>${e.target}` }, classes: classes.filter(Boolean).join(" ") });
@@ -180,7 +224,7 @@ function applyFilters() {
   if (!cy || state.mode !== "blast") return;
   const passing = $("#show-passing").checked, unknown = $("#show-unknown").checked, all = $("#show-all-links").checked;
   cy.batch(() => {
-    cy.nodes().forEach((n) => {
+    cy.nodes().not(".ring").forEach((n) => {
       const d = n.data();
       const keep = d.hops === 0 || d.retracted || d.disputes || d.tier === "builds_on" || d.shown_for === "chain"
         || (d.tier === "passing" && passing) || (d.tier === "not_shown" && unknown);
@@ -207,7 +251,7 @@ function pathToRoot(id) {
 function highlight(eles, zoom = true) {
   const cy = state.cy;
   cy.batch(() => {
-    cy.elements().removeClass("hl").addClass("faded");
+    cy.elements().not(".ring").removeClass("hl").addClass("faded");
     eles.removeClass("faded").addClass("hl");
   });
   if (zoom) fitClear(eles);
@@ -264,7 +308,7 @@ function errorBox(msg) { return h("div", { class: "error", role: "alert" }, msg)
 function rootHeader(r) {
   const ret = r.retractions && r.retractions.length ? r.retractions[r.retractions.length - 1] : null;
   return [
-    h("div", {}, r.retracted ? h("span", { class: "badge retracted" }, ret ? `Retracted ${ret.date}` : "Retracted") : h("span", { class: "badge cls" }, "not marked retracted")),
+    r.retracted ? h("div", { class: "stamp" }, "Retracted", ret ? h("small", {}, ret.date) : null) : h("div", { class: "stamp plain" }, "Not marked retracted"),
     h("h2", {}, clean(r.title)),
     h("div", { class: "meta" }, `${r.year || ""}${r.venue ? " · " + r.venue : ""} · cited by ${num(r.cited_by)} (OpenAlex) · `,
       r.doi ? h("a", { href: `https://doi.org/${r.doi}`, target: "_blank", rel: "noopener" }, "DOI") : null,
@@ -360,6 +404,7 @@ function focusTier(key, btn) {
 // ---------- details: a paper ----------
 async function onNode(node) {
   if (!node || node.empty()) return;
+  if (node.data("open_check")) return openCheck(node.data("open_check"));      // a reference in the list view
   const id = node.id();
   const root = state.mode === "blast" ? state.view.root.id : node.data("ancestor") || null;
   state.cy.elements().unselect();
@@ -432,7 +477,7 @@ function chainList(ch) {
 }
 
 function quote(text) {
-  return text ? h("blockquote", {}, `“${clean(text)}”`)
+  return text ? h("blockquote", {}, h("mark", {}, `“${clean(text)}”`))
               : h("blockquote", { class: "missing" }, "No citation sentence available (Semantic Scholar has none for this link).");
 }
 
@@ -458,6 +503,7 @@ function carryWhy(why) {
 
 // ---------- details: a link ----------
 function onEdge(edge) {
+  if (edge.data("tier")) return openCheck(edge.source().data("open_check"));     // a reference-list summary link
   state.cy.elements().unselect();
   edge.select();
   highlight(edge.union(edge.connectedNodes()));
@@ -503,7 +549,12 @@ function edgeCard(e) {
 
 // ---------- foundation check ----------
 const VERDICT_CLASS = (v) => v.startsWith("RESTS") ? "rests" : v === "NOT PROVEN" ? "notproven" : v.startsWith("CITES") ? "cites"
-  : v.startsWith("NO RETRACTED") ? "none" : v.startsWith("CLEAN") ? "clean" : "nodata";
+  : v.startsWith("NO RETRACTED") ? "none" : v.startsWith("CLEAN") ? "clean" : v === "NOT CHECKED" ? "notchecked" : "nodata";
+
+function placard(verdict, kicker, text) {
+  return h("div", { class: `verdict ${VERDICT_CLASS(verdict)}` },
+    h("div", { class: "kicker" }, h("span", {}, kicker[0]), h("span", {}, kicker[1])), h("b", {}, verdict), h("p", {}, text));
+}
 
 async function checkHome(selectedId) {
   const cfg = state.config;
@@ -516,10 +567,11 @@ async function checkHome(selectedId) {
   ];
   const recent = [
     h("h3", {}, "Recent checks"),
-    list.length ? h("ul", { class: "list" }, list.map((c) => h("li", {},
+    list.length ? h("ul", { class: "list tagged" }, list.map((c) => h("li", {},
       h("button", { type: "button", onclick: () => openCheck(c.investigation) },
-        h("span", { class: "t" }, short(c.title, 80)),
-        h("span", { class: "n" }, c.verdict))))) : h("div", { class: "empty" }, "No checks yet."),
+        h("span", { class: `v ${VERDICT_CLASS(c.verdict)}` }, c.verdict),
+        h("span", { class: "n" }, String(c.created_at || "").slice(0, 10)),
+        h("span", { class: "t" }, short(c.title, 110)))))) : h("div", { class: "empty" }, "No checks yet."),
   ];
   return { intro, recent, list };
 }
@@ -527,8 +579,100 @@ async function checkHome(selectedId) {
 async function showCheckHome() {
   const { intro, recent } = await checkHome();
   if (state.mode !== "check") return;
-  panel(intro, h("div", { id: "detail" }), recent);
+  $("#legend").dataset.mode = "check";
+  panel(intro, refBox(), h("div", { id: "detail" }), recent);
   if (state.cy) state.cy.elements().remove();
+}
+
+// ---------- reference list ----------
+function refBox() {
+  const ta = h("textarea", { id: "refs", spellcheck: "false", "aria-label": "Reference list or BibTeX",
+    placeholder: "Paste a reference list or a BibTeX file. Every DOI in it is checked; an entry without a DOI is counted as not checked." });
+  ta.value = state.refsDraft || "";
+  ta.addEventListener("input", () => { state.refsDraft = ta.value; });
+  const example = async () => {
+    try { ta.value = state.refsDraft = await (await fetch("/example.bib")).text(); ta.focus(); } catch { /* the box stays as it was */ }
+  };
+  return [
+    h("h3", {}, "Or check a whole reference list"),
+    h("form", { class: "refbox", onsubmit: (e) => { e.preventDefault(); runList(ta.value); } },
+      ta,
+      h("div", { class: "row" },
+        h("span", { class: "by" }, state.config.allow_runs ? "Stored checks are reused; the rest are checked now (minutes each). "
+          : "Read only: references checked here before are shown, the rest are NOT CHECKED. ",
+          h("button", { class: "linkbtn", type: "button", onclick: example }, "paste an example")),
+        h("button", { class: "btn", type: "submit" }, "Check list"))),
+  ];
+}
+
+async function runList(text) {
+  if (!text.trim()) return;
+  const req = ++state.req;
+  busy(state.config.allow_runs ? "Checking the list: stored checks first, then each new reference… (minutes)" : "Reading the stored checks…");
+  try {
+    const r = await api("/api/list", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+    if (req !== state.req) return;
+    showList(r);
+  } catch (e) {
+    if (req === state.req) { const { intro, recent } = await checkHome(); panel(errorBox(e.message), intro, refBox(), recent); }
+  } finally {
+    if (req === state.req) busy(false);
+  }
+}
+
+function showList(r) {
+  state.list = r;
+  setURL({ mode: "check" });
+  drawList(r);
+  $("#legend").dataset.mode = "list";
+  const now = r.entries.filter((e) => e.investigation && !e.reused).length, ret = r.cited_papers_retracted;
+  panel(
+    placard(r.verdict, [`Reference list · depth ${state.config.depth}`, `${r.references} references`],
+      `The worst verdict among its references. ${state.config.verdicts[r.verdict] || ""}`),
+    h("p", { class: "note" }, `${r.with_doi} with a DOI and ${r.without_doi} without (a reference without a DOI can't be looked up, so it counts as not checked). `,
+      ret ? `${ret} of the cited papers ${ret > 1 ? "are retracted themselves" : "is retracted itself"}. ` : "",
+      `${r.reused} from earlier checks on this server, ${now} checked now · ${r.credits} OpenAlex credits.`),
+    h("h3", {}, "Selected"),
+    h("div", { id: "detail" }, h("div", { class: "empty" }, "Click a reference to open its check, or a retracted paper to see what it is.")),
+    h("h3", {}, `References with a DOI (${r.entries.length})`),
+    h("ul", { class: "list tagged entries" }, r.entries.map((e) => h("li", {},
+      h("button", { type: "button", disabled: !e.investigation, onclick: () => openCheck(e.investigation) },
+        h("span", { class: `v ${VERDICT_CLASS(e.verdict)}` }, e.verdict),
+        h("span", { class: "n" }, e.reused ? "earlier check" : e.investigation ? "checked now" : ""),
+        h("span", { class: "t" }, e.paper_retracted ? [h("span", { class: "badge retracted" }, "retracted itself"), " "] : null, e.title ? short(e.title, 110) : e.doi)),
+      e.why ? h("div", { class: "why" }, e.why) : null))),
+    h("button", { class: "btn ghost", type: "button", onclick: () => { setURL({ mode: "check" }); showCheckHome(); } }, "← all checks"),
+  );
+}
+
+// the list on the left, its references in the middle, the retracted papers they lead to on the right
+function drawList(r) {
+  const cy = ensureCy();
+  const els = [], refs = new Set();
+  const col = (list, x, i) => ({ x, y: (i - (list.length - 1) / 2) * 86 });
+  els.push({ group: "nodes", data: { id: "list", title: "Your reference list", short: `Your reference list · ${r.references} references`, size: 46, hops: 0 },
+             position: { x: 0, y: 0 }, classes: "subject listnode hl" });
+  r.entries.forEach((e, i) => {
+    const id = e.id || `doi:${e.doi}`;
+    refs.add(id);
+    const cls = e.paper_retracted ? "retracted" : e.verdict.startsWith("RESTS") ? "builds_on" : e.verdict === "NOT CHECKED" ? "not_shown" : "passing";
+    els.push({ group: "nodes", data: { id, title: e.title || e.doi, year: e.year, short: short(e.title || e.doi, 46), size: 26, open_check: e.investigation },
+               position: col(r.entries, 360, i), classes: `${cls} hl` });
+    els.push({ group: "edges", data: { id: `list>${id}`, source: "list", target: id, reliance: 0.3 }, classes: "listlink hl" });
+  });
+  const ancestors = new Map();
+  r.entries.forEach((e) => (e.ancestors || []).forEach((a) => { if (!refs.has(a.id)) ancestors.set(a.id, a); }));
+  [...ancestors.values()].forEach((a, i, all) => els.push({ group: "nodes",
+    data: { id: a.id, title: a.title, year: a.year, short: short(a.title, 46), size: 26 }, position: col(all, 760, i), classes: "retracted hl" }));
+  r.entries.forEach((e) => (e.ancestors || []).forEach((a) => {
+    const id = e.id || `doi:${e.doi}`;
+    if (id === a.id) return;
+    els.push({ group: "edges", data: { id: `${id}>${a.id}`, source: id, target: a.id, tier: a.tier, reliance: 1 },
+               classes: `sum ${VERDICT_CLASS(a.tier)} hl` });
+  }));
+  cy.elements().remove();
+  cy.add(els);
+  cy.layout({ name: "preset", fit: true, padding: 60 }).run();
 }
 
 async function openCheck(inv) {
@@ -561,12 +705,13 @@ async function runCheck(text) {
 
 function showCheck(r) {
   state.check = r;
+  $("#legend").dataset.mode = "check";
   setURL({ mode: "check", id: r.investigation });
   $("#q").value = r.paper.doi || r.paper.id;
   drawCheck(r);
   const cov = r.coverage;
   panel(
-    h("div", { class: `verdict ${VERDICT_CLASS(r.verdict)}` }, h("b", {}, r.verdict), h("p", {}, state.config.verdicts[r.verdict] || "")),
+    placard(r.verdict, [`Foundation check · depth ${state.config.depth}`, r.investigation], state.config.verdicts[r.verdict] || ""),
     h("h2", {}, clean(r.paper.title)),
     h("div", { class: "meta" }, `${r.paper.year || ""} · `, h("a", { href: oa(r.paper.id), target: "_blank", rel: "noopener" }, r.paper.id),
       r.paper.doi ? [" · ", h("a", { href: `https://doi.org/${r.paper.doi}`, target: "_blank", rel: "noopener" }, "DOI")] : null,
@@ -629,13 +774,18 @@ function setMode(mode) {
   state.mode = mode;
   for (const b of document.querySelectorAll(".modes button")) b.setAttribute("aria-selected", String(b.dataset.mode === mode));
   $("#controls").hidden = mode !== "blast";
-  $("#legend").style.display = "";
+  $("#stage").dataset.mode = mode;
+  $("#legend").dataset.mode = mode;
   $("#go").textContent = mode === "blast" ? "Trace" : "Check";
   $("#q").placeholder = mode === "blast" ? "Retracted paper: DOI, OpenAlex ID or PubMed ID" : "Paper to check: DOI, OpenAlex ID or PubMed ID";
   const go = $("#go");
   go.disabled = mode === "check" && !state.config.allow_runs;
   go.title = go.disabled ? "This server is read only" : "";
 }
+
+// the canvas draws labels only in fonts that are already loaded, so load them first (or give up after 1.5 s)
+const fontsReady = Promise.all(["700 14px 'Barlow Condensed'", "600 15px 'Source Serif 4'"].map((f) => document.fonts.load(f)))
+  .catch(() => null);
 
 async function init() {
   try {
@@ -644,6 +794,8 @@ async function init() {
     panel(errorBox(`Can't reach the server: ${e.message}`));
     return;
   }
+  await Promise.race([fontsReady, new Promise((r) => setTimeout(r, 1500))]);
+  fontsReady.then(() => { if (state.cy) state.cy.style(cyStyle()); });
   $("#search").addEventListener("submit", (e) => {
     e.preventDefault();
     const text = $("#q").value.trim();

@@ -197,18 +197,18 @@ Every pick and its reason is stored as `(:Investigation)-[:EXPLORED {round, reas
    - `NO RETRACTED WORK FOUND`: with what could not be checked;
    - `CLEAN · DEPTH 2`: only when every reference to depth 2 was checked;
    - `NO DATA`.
-4. With `--list`, it checks every DOI in a BibTeX file or a pasted reference list within one credit budget. The list gets its worst entry's verdict, and entries without a DOI are counted as not checked.
+4. With `--list` (or the reference-list box in the web UI), it checks every DOI in a BibTeX file or a pasted reference list within one credit budget. The list gets its worst entry's verdict, and a list that cites a retracted paper directly is at least `CITES RETRACTED WORK`. Entries without a DOI are counted as not checked. The web UI reuses each reference's stored check; read only, a reference never checked there is `NOT CHECKED`, never cleared.
 
 ## The web UI
 
-`python -m shaky.web` serves one page (no build step) and a small JSON API over the same queries.
+`python -m shaky.web` serves one page (no build step) and a small JSON API over the same queries. It is styled as an earthquake inspection report for the literature: the retracted paper is the epicentre, the rings are chain lengths, and verdicts are inspection placards.
 
 - **Blast radius.** The retracted paper sits at the centre. A paper sits on ring *k* when its strongest chain has *k* links, next to the paper the chain goes through, so every chain reads straight in. Colour is the tier (red retracted, orange builds on it, grey passing, green disputes it, dashed not shown). Link width is the weight; a dashed link has no sentence; a dotted one was shown not to carry the dependence on.
 - **Click a paper** to see its chain, each link with its sentence, the model that judged it, and the carry check: what the paper uses the cited one for, and what that one took from the retracted paper. **Click a link** to see every sentence behind it.
-- **Foundation check tab:** past checks with their chains, and a new check for any DOI.
-- Built on the Python standard library's HTTP server and one static page with [Cytoscape.js](https://js.cytoscape.org) (pinned, with a subresource-integrity hash). Titles and sentences from papers are always set as text, never as HTML.
+- **Foundation check tab:** past checks with their chains, a new check for any DOI, and a box for a whole reference list (BibTeX or pasted text). The list is drawn as a graph: your list, its references, and the retracted papers they lead to.
+- Built on the Python standard library's HTTP server and one static page with [Cytoscape.js](https://js.cytoscape.org) (pinned, with a subresource-integrity hash) and open-licence fonts from Google Fonts. Titles and sentences from papers are always set as text, never as HTML.
 - `ALLOW_RUNS=0` makes it read only, for a public deployment: it then shows stored results and never spends API credits or model calls.
-- **Deploying:** [docs/DEPLOY.md](docs/DEPLOY.md). `shaky.snapshot` copies the graph without the raw reference lists (21 MB instead of 93 MB, so it fits FalkorDB Cloud's free tier), the `Dockerfile` runs the UI on a Hugging Face Space, and `shaky.preflight` checks the deployment against the snapshot before a demo.
+- **Deploying:** [docs/DEPLOY.md](docs/DEPLOY.md). `shaky.snapshot` copies the graph without the raw reference lists (29 MB instead of 113 MB, so it fits FalkorDB Cloud's free tier), the `Dockerfile` runs the UI on a Hugging Face Space, and `shaky.preflight` checks the deployment against the snapshot before a demo.
 
 ## The MCP server
 
@@ -221,11 +221,28 @@ Every pick and its reason is stored as `(:Investigation)-[:EXPLORED {round, reas
 
 | Tool | What it returns |
 |---|---|
-| `check_foundations(paper, fresh=false)` | The verdict, each retracted paper within 2 links with its chain and quoted evidence, and the coverage. The stored check, unless `fresh` |
+| `check_foundations(paper, evidence=false, fresh=false)` | The verdict, whether the paper is retracted itself, each retracted paper within 2 links, and the coverage; with `evidence`, every chain with its quoted sentences. The stored check, unless `fresh` |
 | `retraction_blast_radius(paper, limit=20)` | The tier counts, the papers that build on it (chain length, risk), the disputes, and the agent's reasons |
 | `explain_chain(paper, retracted)` | The proven and the possible chain, each link with its class, weight, sentence, model and carry votes |
 
 Bad input gets an error that says what is wrong (a title instead of an ID, a missing argument), never a guess.
+
+### An agent that checks before it cites
+
+[`examples/cite_check_agent.py`](examples/cite_check_agent.py) is an ordinary MCP client: it starts the server over stdio, lists its tools, and gives `check_foundations` to a model (Groq's `openai/gpt-oss-120b`). The model gets a claim and the sources a writer wants to cite, checks each one, and answers with the claim cited from the sources it keeps. The rules are enforced in code, not trusted to the model: an answer is sent back if a source is unchecked or unplaced, or if it keeps a source that is retracted itself or rests on retracted work.
+
+```bash
+uv run python examples/cite_check_agent.py
+```
+
+One run, on four real sources for "soluble amyloid-β oligomers, more than plaques, drive memory loss in models of Alzheimer's disease":
+
+| Source | `check_foundations` | The agent |
+|---|---|---|
+| 10.1038/416535a (2002) | NO RETRACTED WORK FOUND | kept |
+| 10.1038/nm1782 (2008) | NOT PROVEN: it cites the retracted paper, with no citing sentence to judge | kept, with a note to read it with care |
+| 10.1038/nature04533 (2006) | retracted itself | dropped |
+| 10.1016/j.neuroscience.2007.10.054 (2007) | RESTS ON RETRACTED WORK | dropped |
 
 ## Limits
 

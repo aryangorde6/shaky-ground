@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shaky Ground</title>
 <meta name="description" content="Finds the science built on retracted research: reliance-weighted citation chains in FalkorDB.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&family=Big+Shoulders+Stencil:wght@900&family=IBM+Plex+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.30.2/dist/cytoscape.min.js"
         integrity="sha256-g+jFSmvsZVv9gd8H32BWScJor2muymel6i2lTqQtrIE=" crossorigin="anonymous"></script>
@@ -29,9 +32,11 @@
     <button type="submit" id="go">Trace</button>
   </form>
 </header>
+<div class="tape" aria-hidden="true"></div>
 
 <main class="layout">
-  <section class="stage" aria-label="Citation graph">
+  <section class="stage" id="stage" aria-label="Citation graph">
+    <div class="watermark" aria-hidden="true">RETRACTED</div>
     <div id="cy"></div>
     <div class="controls" id="controls">
       <label><input type="checkbox" id="show-passing" checked> passing mentions</label>
@@ -39,20 +44,32 @@
       <label><input type="checkbox" id="show-all-links"> every link between these papers</label>
       <button type="button" id="fit">Fit</button>
     </div>
-    <details class="legend" id="legend" open>
-      <summary>Legend</summary>
-      <div class="legend-row"><span class="dot root"></span>retracted</div>
-      <div class="legend-row"><span class="dot builds"></span>builds on it</div>
-      <div class="legend-row"><span class="dot passing"></span>cites it in passing</div>
-      <div class="legend-row"><span class="dot disputes"></span>disputes it</div>
-      <div class="legend-row"><span class="dot unknown"></span>not shown either way</div>
+    <details class="legend" id="legend" data-mode="blast" open>
+      <summary>Key</summary>
+      <div class="legend-row only-blast"><span class="dot root"></span>retracted (the epicentre)</div>
+      <div class="legend-row only-blast"><span class="dot builds"></span>builds on it</div>
+      <div class="legend-row only-blast"><span class="dot passing"></span>cites it in passing</div>
+      <div class="legend-row only-blast"><span class="dot disputes"></span>disputes it</div>
+      <div class="legend-row only-blast"><span class="dot unknown"></span>not shown either way</div>
+      <div class="legend-row only-blast">rings: 1, 2, 3 links from it</div>
+      <div class="legend-row only-check"><span class="dot subject"></span>the paper checked</div>
+      <div class="legend-row only-check"><span class="dot passing"></span>a paper on the way</div>
+      <div class="legend-row only-check"><span class="dot root"></span>retracted</div>
+      <div class="legend-row only-list"><span class="dot subject"></span>your reference list</div>
+      <div class="legend-row only-list"><span class="dot builds"></span>rests on retracted work</div>
+      <div class="legend-row only-list"><span class="dot passing"></span>a reference</div>
+      <div class="legend-row only-list"><span class="dot unknown"></span>not checked</div>
+      <div class="legend-row only-list"><span class="dot root"></span>retracted</div>
       <div class="legend-sep"></div>
-      <div class="legend-row"><span class="ln f"></span>FOUNDATIONAL 1.0</div>
-      <div class="legend-row"><span class="ln s"></span>SUPPORTING 0.6</div>
-      <div class="legend-row"><span class="ln b"></span>BACKGROUND 0.15</div>
-      <div class="legend-row"><span class="ln c"></span>CRITICAL 0</div>
-      <div class="legend-row"><span class="ln u"></span>UNKNOWN 0.3 (no sentence)</div>
-      <div class="legend-row"><span class="ln n"></span>does not carry it on</div>
+      <div class="legend-row links"><span class="ln f"></span>FOUNDATIONAL 1.0</div>
+      <div class="legend-row links"><span class="ln s"></span>SUPPORTING 0.6</div>
+      <div class="legend-row links"><span class="ln b"></span>BACKGROUND 0.15</div>
+      <div class="legend-row links"><span class="ln c"></span>CRITICAL 0</div>
+      <div class="legend-row links"><span class="ln u"></span>UNKNOWN 0.3 (no sentence)</div>
+      <div class="legend-row links"><span class="ln n"></span>does not carry it on</div>
+      <div class="legend-row only-list"><span class="ln f"></span>rests on it (a proven chain)</div>
+      <div class="legend-row only-list"><span class="ln s dash"></span>not proven</div>
+      <div class="legend-row only-list"><span class="ln b"></span>cites it</div>
     </details>
     <div class="tip" id="tip" role="tooltip" hidden></div>
     <div class="busy" id="busy" hidden><span class="spinner"></span><span id="busy-text">Building the view…</span></div>

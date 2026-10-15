@@ -204,36 +204,59 @@ def _bib_entries(text: str) -> list[str]:
     return out
 
 
-def check_list(g: Graph, text: str, max_credits: int = 200, **kw) -> dict:
+MAX_LIST = 100      # DOIs in one reference list
+
+
+def check_list(g: Graph, text: str, max_credits: int = 200, stored=None, known=None, run: bool = True, **kw) -> dict:
     """A foundation check of every reference in a list, within one OpenAlex credit budget. The list's
-    verdict is its worst entry's; entries that could not be checked are counted, never cleared."""
+    verdict is its worst entry's; entries that could not be checked are counted, never cleared.
+
+    stored(doi) may return an earlier check of a reference to reuse instead of running it again; with
+    run=False (a read-only server), a reference with no earlier check is NOT CHECKED, but known(doi) can
+    still say whether that paper is retracted itself. A list that cites a retracted paper directly is at
+    least CITES RETRACTED WORK."""
     dois, no_doi = dois_in(text)
     if not dois:
         raise resolve.ResolveError("no DOIs found: paste a reference list or BibTeX with DOIs in it")
+    if len(dois) > MAX_LIST:
+        raise resolve.ResolveError(f"{len(dois)} DOIs found; a list can hold at most {MAX_LIST}")
     entries, left = [], max_credits
     for doi in dois:
-        if left <= 0:
-            entries.append({"doi": doi, "verdict": "NOT CHECKED", "why": "credit budget used up"})
-            continue
-        try:
-            r = check(g, doi, max_credits=left, **kw)
-        except (resolve.ResolveError, FetchError) as e:
-            entries.append({"doi": doi, "verdict": "NOT CHECKED", "why": str(e)})
-            continue
-        left -= r["credits"]
-        entries.append({"doi": doi, "id": r["paper"]["id"], "title": r["paper"]["title"], "verdict": r["verdict"],
-                        "paper_retracted": r["paper_retracted"], "investigation": r["investigation"],
-                        "retracted_ancestors": len(r["retracted_ancestors"])})
+        r = stored(doi) if stored else None
+        reused = r is not None
+        if r is None:
+            if not run:
+                p = known(doi) if known else None
+                entries.append({"doi": doi, "verdict": "NOT CHECKED",
+                                "why": "not checked on this server before, and it is read only",
+                                **({"id": p["id"], "title": p["title"], "year": p["year"],
+                                    "paper_retracted": bool(p["retracted"])} if p else {})})
+                continue
+            if left <= 0:
+                entries.append({"doi": doi, "verdict": "NOT CHECKED", "why": "credit budget used up"})
+                continue
+            try:
+                r = check(g, doi, max_credits=left, **kw)
+            except (resolve.ResolveError, FetchError) as e:
+                entries.append({"doi": doi, "verdict": "NOT CHECKED", "why": str(e)})
+                continue
+            left -= r["credits"]
+        ancestors = r.get("retracted_ancestors") or []
+        entries.append({"doi": doi, "id": r["paper"]["id"], "title": r["paper"]["title"], "year": r["paper"].get("year"),
+                        "verdict": r["verdict"], "paper_retracted": r.get("paper_retracted"),
+                        "investigation": r.get("investigation"), "reused": reused,
+                        "retracted_ancestors": len(ancestors),
+                        "ancestors": [{k: a.get(k) for k in ("id", "title", "year", "tier")} for a in ancestors]})
     worst = ["RESTS ON RETRACTED WORK", "NOT PROVEN", "CITES RETRACTED WORK"]
     verdicts = [e["verdict"] for e in entries]
     retracted = sum(1 for e in entries if e.get("paper_retracted"))
-    overall = next((v for v in worst if v in verdicts), None)
+    overall = next((v for v in worst if v in verdicts or (retracted and v == "CITES RETRACTED WORK")), None)
     if overall is None:
         overall = "NO RETRACTED WORK FOUND" if verdicts.count(f"CLEAN · DEPTH {DEPTH}") < len(entries) or no_doi \
             else f"CLEAN · DEPTH {DEPTH}"
     return {"verdict": overall, "references": len(dois) + no_doi, "with_doi": len(dois), "without_doi": no_doi,
             "cited_papers_retracted": retracted, "counts": {v: verdicts.count(v) for v in dict.fromkeys(verdicts)},
-            "entries": entries, "credits": max_credits - left}
+            "reused": sum(1 for e in entries if e.get("reused")), "entries": entries, "credits": max_credits - left}
 
 
 def list_summary(r: dict) -> str:
@@ -243,6 +266,7 @@ def list_summary(r: dict) -> str:
     for e in r["entries"]:
         lines.append(f"- {e['verdict']}: {(e.get('title') or e['doi'])[:80]} ({e['doi']})"
                      + (" · ITSELF RETRACTED" if e.get("paper_retracted") else "")
+                     + (" · earlier check" if e.get("reused") else "")
                      + (f" · {e['why']}" if e.get("why") else ""))
     return "\n".join(lines)
 

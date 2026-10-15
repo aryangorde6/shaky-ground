@@ -10,6 +10,8 @@ GET  /api/edge?a=W..&b=W..            one citation: sentences, class, model, car
 GET  /api/checks                      recent foundation checks
 GET  /api/check?id=<investigation>    one foundation check's result
 POST /api/check {"paper": "<doi>"}    run a foundation check (needs ALLOW_RUNS=1)
+POST /api/list {"text": "<refs>"}     check every DOI in a reference list or BibTeX (stored checks are reused;
+                                      read only, references never checked here are NOT CHECKED)
 """
 import json
 import os
@@ -26,11 +28,13 @@ from .resolve import ResolveError
 
 WEB = Path(__file__).resolve().parent.parent / "web"
 STATIC = {"/": ("index.html", "text/html"), "/app.js": ("app.js", "text/javascript"),
-          "/style.css": ("style.css", "text/css")}
-# the page runs only its own script and Cytoscape from jsDelivr (Cytoscape sets inline styles on its canvas)
-CSP = ("default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; "
+          "/style.css": ("style.css", "text/css"), "/example.bib": ("example.bib", "text/plain")}
+# the page runs only its own script and Cytoscape from jsDelivr (Cytoscape sets inline styles on its canvas);
+# its fonts come from Google Fonts
+CSP = ("default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; "
+       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; "
        "img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'")
-MAX_BODY = 10_000
+MAX_BODY = {"/api/check": 10_000, "/api/list": 300_000}
 
 graph = db.graph()
 
@@ -101,15 +105,20 @@ class Handler(BaseHTTPRequestHandler):
         self._json(404, {"error": f"no such page: {url.path}"})
 
     def do_POST(self) -> None:
-        if urlparse(self.path).path != "/api/check":
+        path = urlparse(self.path).path
+        if path not in MAX_BODY:
             return self._json(404, {"error": "no such endpoint"})
         length = int(self.headers.get("Content-Length") or 0)
-        if length > MAX_BODY:
+        if length > MAX_BODY[path]:
             return self._json(413, {"error": "request too large"})
         try:
             body = json.loads(self.rfile.read(length) or b"{}")
-        except json.JSONDecodeError:
-            return self._json(400, {"error": "the body must be JSON: {\"paper\": \"<doi>\"}"})
+            if not isinstance(body, dict):
+                raise ValueError
+        except ValueError:
+            return self._json(400, {"error": "the body must be a JSON object, e.g. {\"paper\": \"<doi>\"}"})
+        if path == "/api/list":
+            return self._api(lambda: views.check_list(graph, str(body.get("text") or "")))
         self._api(lambda: views.run_check(graph, str(body.get("paper") or ""),
                                           max(1, min(100, int(body.get("credits") or 50)))))
 
