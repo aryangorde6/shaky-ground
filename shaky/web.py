@@ -22,6 +22,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
+import redis
+
 from . import config, db, foundation, report, risk, views
 from .reliance import WEIGHTS
 from .resolve import ResolveError
@@ -40,7 +42,18 @@ MAX_BODY = {"/api/check": 10_000, "/api/list": 300_000}
 SLOTS = threading.BoundedSemaphore(int(os.getenv("API_SLOTS", "4")))
 SLOT_WAIT = 30
 
-graph = db.graph()
+_graph = None
+_connecting = threading.Lock()
+
+
+def graph():
+    """The graph, connected on first use, so the server starts (and says why it can't answer) while the
+    database is unreachable instead of crashing."""
+    global _graph
+    with _connecting:
+        if _graph is None:
+            _graph = db.graph()
+        return _graph
 
 
 def _int(qs: dict, name: str, default: int, lo: int, hi: int) -> int:
@@ -84,6 +97,9 @@ class Handler(BaseHTTPRequestHandler):
             self._json(403, {"error": str(e)})
         except views.NotFound as e:
             self._json(404, {"error": str(e)})
+        except (redis.exceptions.ConnectionError, redis.exceptions.TimeoutError) as e:
+            print(f"graph database unreachable: {e}", file=sys.stderr, flush=True)
+            self._json(503, {"error": "the graph database can't be reached right now; try again in a minute"})
         except Exception:      # details go to the server log, not to the page
             traceback.print_exc()
             self._json(500, {"error": "something went wrong on the server; see its log"})
@@ -101,12 +117,12 @@ class Handler(BaseHTTPRequestHandler):
                                     "graph": config.GRAPH_NAME, "weights": WEIGHTS, "meaning": report.CLASS_MEANING,
                                     "verdicts": foundation.VERDICTS, "builds_on": risk.BUILDS_ON,
                                     "max_hops": risk.MAX_HOPS, "depth": foundation.DEPTH},
-            "/api/blast": lambda: views.blast(graph, views.find(graph, _arg(qs, "paper")),
+            "/api/blast": lambda: views.blast(graph(), views.find(graph(), _arg(qs, "paper")),
                                               _int(qs, "passing", 40, 0, 200), _int(qs, "not_shown", 25, 0, 200)),
-            "/api/paper": lambda: views.paper(graph, views.find(graph, _arg(qs, "id")), views.find(graph, _arg(qs, "root"))),
-            "/api/edge": lambda: views.edge(graph, views.find(graph, _arg(qs, "a")), views.find(graph, _arg(qs, "b"))),
-            "/api/checks": lambda: views.checks(graph),
-            "/api/check": lambda: views.check_result(graph, _arg(qs, "id")),
+            "/api/paper": lambda: views.paper(graph(), views.find(graph(), _arg(qs, "id")), views.find(graph(), _arg(qs, "root"))),
+            "/api/edge": lambda: views.edge(graph(), views.find(graph(), _arg(qs, "a")), views.find(graph(), _arg(qs, "b"))),
+            "/api/checks": lambda: views.checks(graph()),
+            "/api/check": lambda: views.check_result(graph(), _arg(qs, "id")),
         }
         if url.path in routes:
             return self._api(routes[url.path])
@@ -126,19 +142,26 @@ class Handler(BaseHTTPRequestHandler):
         except ValueError:
             return self._json(400, {"error": "the body must be a JSON object, e.g. {\"paper\": \"<doi>\"}"})
         if path == "/api/list":
-            return self._api(lambda: views.check_list(graph, str(body.get("text") or "")))
-        self._api(lambda: views.run_check(graph, str(body.get("paper") or ""),
+            return self._api(lambda: views.check_list(graph(), str(body.get("text") or "")))
+        self._api(lambda: views.run_check(graph(), str(body.get("paper") or ""),
                                           max(1, min(100, int(body.get("credits") or 50)))))
 
     def log_message(self, fmt, *args) -> None:
         sys.stderr.write(f"{self.address_string()} {fmt % args}\n")
 
 
+def warm() -> None:
+    """Build the demo view before the first visitor asks for it."""
+    try:
+        views.blast(graph(), config.DEMO_ROOT)
+    except Exception as e:
+        print(f"could not build the demo view yet: {e}", file=sys.stderr, flush=True)
+
+
 def main() -> None:
     host, port = os.getenv("HOST", "127.0.0.1"), int(os.getenv("PORT", "8000"))
     server = ThreadingHTTPServer((host, port), Handler)
-    # build the demo view before the first visitor asks for it
-    threading.Thread(target=lambda: views.blast(graph, config.DEMO_ROOT), daemon=True).start()
+    threading.Thread(target=warm, daemon=True).start()
     print(f"Shaky Ground on http://{host}:{port} (graph '{config.GRAPH_NAME}', "
           f"{'runs allowed' if config.ALLOW_RUNS else 'read only'})", flush=True)
     server.serve_forever()

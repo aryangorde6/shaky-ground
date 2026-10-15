@@ -209,7 +209,7 @@ Every pick and its reason is stored as `(:Investigation)-[:EXPLORED {round, reas
 - Built on the Python standard library's HTTP server and one static page with [Cytoscape.js](https://js.cytoscape.org) (pinned, with a subresource-integrity hash) and open-licence fonts from Google Fonts. Titles and sentences from papers are always set as text, never as HTML.
 - `ALLOW_RUNS=0` makes it read only, for a public deployment: it then shows stored results and never spends API credits or model calls.
 - **Bounded reads.** On FalkorDB Cloud's free tier, query memory counts against the same 100 MB as the data, so a burst of visitors must not become a burst of queries: every read has a timeout (15 s), at most 4 API requests touch the graph at once, a view build runs at most 4 queries in parallel, and visitors who arrive together wait for one build instead of each starting their own.
-- **Deploying:** [docs/DEPLOY.md](docs/DEPLOY.md). `shaky.snapshot` copies the graph without the raw reference lists (29 MB instead of 113 MB, so it fits FalkorDB Cloud's free tier), the `Dockerfile` runs the UI on a Hugging Face Space, and `shaky.preflight` checks the deployment against the snapshot before a demo.
+- **Deploying:** [docs/DEPLOY.md](docs/DEPLOY.md). `shaky.snapshot` copies the graph without the raw reference lists (29 MB instead of 113 MB, so it fits FalkorDB Cloud's free tier), the `Dockerfile` runs the UI on Railway (next to the Cloud instance, in US East), and `shaky.preflight` checks the deployment against the snapshot before a demo.
 
 ## The MCP server
 

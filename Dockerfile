@@ -1,4 +1,4 @@
-# The web UI as a container, e.g. for a Hugging Face Space (Docker SDK, port 7860).
+# The web UI as a container; the live demo runs it on Railway (docs/DEPLOY.md), listening on PORT (7860).
 # Read only: it serves stored results from a FalkorDB the settings point at, and never spends
 # API credits or model calls. Settings come from the host's secrets, never from a file in the image.
 FROM python:3.12-slim

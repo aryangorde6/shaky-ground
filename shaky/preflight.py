@@ -41,7 +41,7 @@ def get(url: str) -> tuple[int, dict, bytes, float]:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--snapshot", help="the snapshot the deployment was restored from (its manifest is the expectation)")
-    ap.add_argument("--url", help="the live site, e.g. https://....hf.space")
+    ap.add_argument("--url", help="the live site, e.g. https://shaky-ground-production.up.railway.app")
     args = ap.parse_args()
     manifest = None
     if args.snapshot:
