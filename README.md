@@ -6,6 +6,8 @@ Shaky Ground loads a citation graph into FalkorDB from public data (Retraction W
 
 Graph Hacks: Context for AI Agents (WeMakeDevs × FalkorDB), **Track 01: Agents That Act on Connected Data**.
 
+**Live demo (read only): https://shaky-ground-production.up.railway.app**, the web UI on Railway, reading a FalkorDB Cloud instance ([how it's deployed](docs/DEPLOY.md)).
+
 > Work in progress during the hackathon (Oct 15–18, 2026).
 
 ## What it found for one retracted paper

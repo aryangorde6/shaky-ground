@@ -33,9 +33,9 @@ def get(url: str) -> tuple[int, dict, bytes, float]:
     req = urllib.request.Request(url, headers={"User-Agent": "shaky-preflight"})
     try:
         with urllib.request.urlopen(req, timeout=60) as r:
-            return r.status, dict(r.headers), r.read(), time.perf_counter() - start
+            return r.status, {k.lower(): v for k, v in r.headers.items()}, r.read(), time.perf_counter() - start
     except urllib.error.HTTPError as e:
-        return e.code, dict(e.headers), e.read(), time.perf_counter() - start
+        return e.code, {k.lower(): v for k, v in e.headers.items()}, e.read(), time.perf_counter() - start
 
 
 def main() -> None:
@@ -97,7 +97,7 @@ def main() -> None:
         base = args.url.rstrip("/")
         status, headers, body, sec = get(base + "/")
         check(status == 200 and b"Shaky Ground" in body, f"site serves the page ({status}, {sec:.2f} s)")
-        check("Content-Security-Policy" in headers, "site sends a Content-Security-Policy")
+        check("content-security-policy" in headers, "site sends a Content-Security-Policy")   # names lowercased: HTTP/2 sends them so
         status, _, body, sec = get(base + "/api/config")
         cfg = json.loads(body) if status == 200 else {}
         check(status == 200, f"/api/config answers ({sec:.2f} s); allow_runs = {cfg.get('allow_runs')}")

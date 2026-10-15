@@ -15,7 +15,7 @@ uv run python -m shaky.snapshot export data/snapshot.jsonl.gz
 
 The snapshot keeps every node, edge and property the UI reads and drops each paper's raw reference
 list, which only the loaders use. On Oct 15: 10,852 papers and 147,434 citations, 2.0 MB gzipped;
-restored, the graph uses 29 MB (the free Cloud tier allows 100 MB). The file stays on your machine
+restored, the graph uses 29 MB locally and 15 MB on the Cloud instance (FalkorDB v4.22; the free tier allows 100 MB). The file stays on your machine
 (`data/` is gitignored).
 
 ## 2. FalkorDB Cloud
