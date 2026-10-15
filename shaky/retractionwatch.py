@@ -3,6 +3,7 @@
 One CSV of every notice (~70 MB), downloaded once and refreshed weekly.
 """
 import csv
+import functools
 import time
 from collections import defaultdict
 from datetime import datetime
@@ -41,6 +42,7 @@ def _reason(text: str) -> str:
     return "; ".join(part.strip().lstrip("+") for part in text.split(";") if part.strip())
 
 
+@functools.cache   # parsing the CSV takes ~3 s; do it once per process
 def retractions_by_doi() -> dict[str, list[dict]]:
     """DOI -> its retraction notices, for every retracted paper that was not later reinstated.
 

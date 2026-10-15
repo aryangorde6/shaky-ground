@@ -1,4 +1,4 @@
-"""How much a citing paper relies on the paper it cites. The LLM picks a class; this table,
+"""How much a citing paper relies on the paper it cites. The judge's answers decide a class; this table,
 not the model, turns it into the number that the risk math multiplies."""
 
 WEIGHTS = {

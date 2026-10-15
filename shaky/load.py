@@ -14,7 +14,7 @@ import time
 
 from falkordb import Graph
 
-from . import db, openalex, retractionwatch
+from . import db, openalex, resolve, retractionwatch
 from .reliance import WEIGHTS
 
 BATCH = 250
@@ -98,15 +98,20 @@ def load_neighbourhood(g: Graph, key: str, max_citers: int | None = None,
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("key", help="OpenAlex ID (W...) or doi:10...")
+    ap.add_argument("paper", help="a DOI, OpenAlex ID or PubMed ID, in any common shape")
     ap.add_argument("--max-citers", type=int, default=None)
     ap.add_argument("--refresh", action="store_true", help="ignore the API cache")
     args = ap.parse_args()
 
+    try:
+        found = resolve.resolve(args.paper)
+    except resolve.ResolveError as e:
+        raise SystemExit(str(e))
+    print(f"{args.paper} -> {found['id']}: {found['title']} ({found['year']})")
     g = db.graph()
     db.ensure_schema(g)
     start = time.perf_counter()
-    result = load_neighbourhood(g, args.key, args.max_citers, args.refresh)
+    result = load_neighbourhood(g, found["id"], args.max_citers, args.refresh)
     print(f"loaded in {time.perf_counter() - start:.1f}s: {result}")
     print(f"OpenAlex: {openalex.api.fetched} requests sent, {openalex.api.cached} from cache; "
           f"credits today {openalex.credits()}")

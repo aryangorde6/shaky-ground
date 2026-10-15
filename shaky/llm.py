@@ -25,13 +25,15 @@ class LLMError(Exception):
     pass
 
 
-def chat_json(system: str, user: str, providers=("groq", "gemini"), max_tokens: int = 8192) -> dict:
+def chat_json(system: str, user: str, providers=("groq", "gemini"), max_tokens: int = 8192,
+              effort: str = "low") -> dict:
     """Returns {"data": <parsed JSON>, "provider", "model", "usage"}. The same prompt is sent
-    to the same model only once."""
+    to the same model only once. effort is the model's reasoning effort: low, medium or high."""
     errors = []
     for name in providers:
         base, key, model = PROVIDERS[name]
-        digest = hashlib.sha1(json.dumps([name, model, system, user]).encode()).hexdigest()
+        key_parts = [name, model, system, user] + ([effort] if effort != "low" else [])
+        digest = hashlib.sha1(json.dumps(key_parts).encode()).hexdigest()
         file = CACHE_DIR / f"{name}-{digest[:16]}.json"
         if file.exists():
             return json.loads(file.read_text())
@@ -39,7 +41,7 @@ def chat_json(system: str, user: str, providers=("groq", "gemini"), max_tokens: 
             errors.append(f"{name}: no key")
             continue
         body = {"model": model, "temperature": 0, "max_tokens": max_tokens,
-                "reasoning_effort": "low", "response_format": {"type": "json_object"},
+                "reasoning_effort": effort, "response_format": {"type": "json_object"},
                 "messages": [{"role": "system", "content": system},
                              {"role": "user", "content": user}]}
         for attempt in range(3):
@@ -56,7 +58,7 @@ def chat_json(system: str, user: str, providers=("groq", "gemini"), max_tokens: 
                     print(f"  {name}: rate-limited, waiting {float(wait):.0f}s")
                     time.sleep(float(wait) + 1)
                     continue
-                errors.append(f"{name}: HTTP 429 (quota)")
+                errors.append(f"{name}: HTTP 429 {r.text[:200].replace(key, '<key>')}")
                 break
             if r.status_code in (500, 502, 503, 504) and attempt < 2:
                 delay = 20 * (attempt + 1)
