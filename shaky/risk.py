@@ -8,7 +8,7 @@ riskiest chain of up to MAX_HOPS citations. Two ways to get it, which always agr
   It writes Paper.risk (possible) and Paper.risk_proven (evidence only) for one root at a
   time, and labels the papers proven to build on the root :Contaminated.
 - chain(): one paper's riskiest chain, by reduce() over all its paths to the root, with the
-  evidence on every link.
+  evidence on every link (of equally risky chains, the shortest).
 """
 from falkordb import Graph
 
@@ -55,12 +55,13 @@ CHAIN = """
 MATCH p = (a:Paper {{id: $id}})-[:CITES*1..{hops}]->(:Paper {{id: $root}})
 WHERE all(c IN relationships(p) WHERE {counts})
 WITH p, reduce(r = 1.0, c IN relationships(p) | r * {weight}) AS risk
-ORDER BY risk DESC
+ORDER BY risk DESC, length(p)
 LIMIT 1
 RETURN risk,
        [n IN nodes(p) | {{id: n.id, title: n.title, year: n.year, retracted: n.retracted}}],
        [c IN relationships(p) | {{cls: c.cls, reliance: c.reliance, evidence: c.evidence, judged_by: c.judged_by,
-                                  carries: c.carries, carry_evidence: c.carry_evidence, carry_votes: c.carry_votes}}]
+                                  carries: c.carries, carry_evidence: c.carry_evidence, carry_votes: c.carry_votes,
+                                  carry_why: c.carry_why}}]
 """
 
 

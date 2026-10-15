@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shaky Ground</title>
+<meta name="description" content="Finds the science built on retracted research: reliance-weighted citation chains in FalkorDB.">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/cytoscape@3.30.2/dist/cytoscape.min.js"
+        integrity="sha256-g+jFSmvsZVv9gd8H32BWScJor2muymel6i2lTqQtrIE=" crossorigin="anonymous"></script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<header class="bar">
+  <div class="brand">
+    <span class="mark" aria-hidden="true"></span>
+    <div>
+      <h1>Shaky Ground</h1>
+      <p>the science built on retracted research</p>
+    </div>
+  </div>
+  <nav class="modes" role="tablist" aria-label="Mode">
+    <button role="tab" id="tab-blast" aria-selected="true" data-mode="blast">Blast radius</button>
+    <button role="tab" id="tab-check" aria-selected="false" data-mode="check">Foundation check</button>
+  </nav>
+  <form id="search" class="search" autocomplete="off">
+    <label for="q" class="sr-only">Paper</label>
+    <input id="q" name="q" placeholder="DOI, OpenAlex ID or PubMed ID" spellcheck="false">
+    <button type="submit" id="go">Trace</button>
+  </form>
+</header>
+
+<main class="layout">
+  <section class="stage" aria-label="Citation graph">
+    <div id="cy"></div>
+    <div class="controls" id="controls">
+      <label><input type="checkbox" id="show-passing" checked> passing mentions</label>
+      <label><input type="checkbox" id="show-unknown" checked> not shown either way</label>
+      <label><input type="checkbox" id="show-all-links"> every link between these papers</label>
+      <button type="button" id="fit">Fit</button>
+    </div>
+    <details class="legend" id="legend" open>
+      <summary>Legend</summary>
+      <div class="legend-row"><span class="dot root"></span>retracted</div>
+      <div class="legend-row"><span class="dot builds"></span>builds on it</div>
+      <div class="legend-row"><span class="dot passing"></span>cites it in passing</div>
+      <div class="legend-row"><span class="dot disputes"></span>disputes it</div>
+      <div class="legend-row"><span class="dot unknown"></span>not shown either way</div>
+      <div class="legend-sep"></div>
+      <div class="legend-row"><span class="ln f"></span>FOUNDATIONAL 1.0</div>
+      <div class="legend-row"><span class="ln s"></span>SUPPORTING 0.6</div>
+      <div class="legend-row"><span class="ln b"></span>BACKGROUND 0.15</div>
+      <div class="legend-row"><span class="ln c"></span>CRITICAL 0</div>
+      <div class="legend-row"><span class="ln u"></span>UNKNOWN 0.3 (no sentence)</div>
+      <div class="legend-row"><span class="ln n"></span>does not carry it on</div>
+    </details>
+    <div class="tip" id="tip" role="tooltip" hidden></div>
+    <div class="busy" id="busy" hidden><span class="spinner"></span><span id="busy-text">Building the view…</span></div>
+  </section>
+
+  <aside class="panel" id="panel" aria-live="polite"></aside>
+</main>
+</body>
+</html>

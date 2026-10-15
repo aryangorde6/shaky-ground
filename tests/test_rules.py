@@ -4,7 +4,7 @@
 """
 import unittest
 
-from shaky import carry, judge, resolve, risk
+from shaky import carry, judge, mcp_server, resolve, risk
 from shaky.reliance import WEIGHTS
 
 
@@ -71,6 +71,33 @@ class Carry(unittest.TestCase):
         self.assertEqual(list(out), [0])
         self.assertIs(out[0]["carries"], True)
         self.assertEqual(out[0]["took"], {"B1": "a buffer"})
+
+
+class McpProtocol(unittest.TestCase):
+    """The JSON-RPC layer of the MCP server; none of these touch the database."""
+
+    def test_handshake_and_tools(self):
+        r = mcp_server.handle({"jsonrpc": "2.0", "id": 1, "method": "initialize",
+                               "params": {"protocolVersion": "2025-06-18", "capabilities": {}}})
+        self.assertEqual(r["result"]["protocolVersion"], "2025-06-18")
+        self.assertIn("tools", r["result"]["capabilities"])
+        names = [t["name"] for t in mcp_server.handle({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})["result"]["tools"]]
+        self.assertEqual(names, ["check_foundations", "retraction_blast_radius", "explain_chain"])
+        self.assertIsNone(mcp_server.handle({"jsonrpc": "2.0", "method": "notifications/initialized"}))
+
+    def test_unknown_version_gets_one_we_speak(self):
+        r = mcp_server.handle({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "1999-01-01"}})
+        self.assertIn(r["result"]["protocolVersion"], mcp_server.VERSIONS)
+
+    def test_errors(self):
+        self.assertEqual(mcp_server.handle({"jsonrpc": "2.0", "id": 3, "method": "nope"})["error"]["code"], -32601)
+        r = mcp_server.handle({"jsonrpc": "2.0", "id": 4, "method": "tools/call", "params": {"name": "nope"}})
+        self.assertEqual(r["error"]["code"], -32602)
+        r = mcp_server.handle({"jsonrpc": "2.0", "id": 5, "method": "tools/call",
+                               "params": {"name": "explain_chain", "arguments": {"paper": "W1", "limit": 3}}})
+        self.assertTrue(r["result"]["isError"])
+        self.assertIn("missing ['retracted']", r["result"]["content"][0]["text"])
+        self.assertIn("unknown ['limit']", r["result"]["content"][0]["text"])
 
 
 if __name__ == "__main__":

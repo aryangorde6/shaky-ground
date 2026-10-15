@@ -27,6 +27,16 @@ from . import carry, db, evidence, judge, load, openalex, resolve, risk
 
 DEPTH = 2
 ORDER = ["RESTS ON RETRACTED WORK", "NOT PROVEN", "CITES RETRACTED WORK"]   # worst first
+VERDICTS = {    # what each verdict means, for the UI and the MCP server
+    "RESTS ON RETRACTED WORK": "A chain to a retracted paper has every link FOUNDATIONAL or SUPPORTING; "
+                               "a second link was also shown, by two models, to carry the retracted part.",
+    "NOT PROVEN": "A retracted paper is in reach and a chain to it could reach that bar, "
+                  "but some link on it has no usable evidence.",
+    "CITES RETRACTED WORK": "Every chain to retracted work has a passing (BACKGROUND) or critical link.",
+    "NO RETRACTED WORK FOUND": "None in the references that could be checked. Not a clean bill: some could not be checked.",
+    f"CLEAN · DEPTH {DEPTH}": f"No retracted work, and every reference to depth {DEPTH} was checked.",
+    "NO DATA": "OpenAlex has no reference list for this paper, so nothing could be checked.",
+}
 
 ANCESTORS = """
 MATCH (p:Paper {id: $id})-[:CITES*1..2]->(r:Paper)
@@ -90,7 +100,8 @@ def check(g: Graph, text: str, providers=("groq", "gemini"), batch: int = 12, ma
     out = {"paper": {k: p[k] for k in ("id", "doi", "title", "year")}, "paper_retracted": p["oa_retracted"]}
     if not p["refs"]:
         load.upsert_papers(g, [p])
-        return {**out, "verdict": "NO DATA", "why": "OpenAlex has no reference list for this paper"}
+        return _record(g, {**out, "verdict": "NO DATA", "why": "OpenAlex has no reference list for this paper",
+                           "retracted_ancestors": [], "credits": openalex.credits()["used"] - used})
     coverage = _load(g, p, max_credits)
 
     ancestors = []
@@ -124,12 +135,19 @@ def check(g: Graph, text: str, providers=("groq", "gemini"), batch: int = 12, ma
         verdict = min((a["tier"] for a in ancestors), key=ORDER.index)
     else:
         verdict = f"CLEAN · DEPTH {DEPTH}" if complete else "NO RETRACTED WORK FOUND"
-    result = {**out, "verdict": verdict, "retracted_ancestors": ancestors, "coverage": coverage,
-              "coverage_complete": complete, "credits": openalex.credits()["used"] - used}
+    return _record(g, {**out, "verdict": verdict, "retracted_ancestors": ancestors, "coverage": coverage,
+                       "coverage_complete": complete, "credits": openalex.credits()["used"] - used})
+
+
+def _record(g: Graph, result: dict) -> dict:
+    """Store the check as an Investigation. The whole result is kept, so the UI and the MCP server
+    can show a past check without redoing it."""
+    result["investigation"] = uuid.uuid4().hex[:8]
     g.query("""CREATE (:Investigation {id: $id, mode: 'foundation_check', root: $root, created_at: $t,
-               status: 'done', verdict: $verdict, ancestors: $n, credits: $credits})""",
-            {"id": uuid.uuid4().hex[:8], "root": pid, "t": _now(), "verdict": verdict,
-             "n": len(ancestors), "credits": result["credits"]})
+               status: 'done', verdict: $verdict, ancestors: $n, credits: $credits, result: $result})""",
+            {"id": result["investigation"], "root": result["paper"]["id"], "t": _now(), "verdict": result["verdict"],
+             "n": len(result["retracted_ancestors"]), "credits": result["credits"],
+             "result": json.dumps(result, default=str)})
     return result
 
 

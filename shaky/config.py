@@ -17,5 +17,10 @@ S2_API_KEY = os.getenv("S2_API_KEY", "")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 
+# Whether the web UI and the MCP server may start work that writes to the graph and spends API credits
+# and model calls (a foundation check, recomputing risk for another root). Off for a public deployment.
+ALLOW_RUNS = os.getenv("ALLOW_RUNS", "1") == "1"
+DEMO_ROOT = os.getenv("DEMO_ROOT", "W2075481535")     # what the UI opens on: Lesné et al. 2006, Nature
+
 # Downloads and the API cache (gitignored). Defaults to shaky-ground/data.
 DATA_DIR = Path(os.getenv("DATA_DIR") or Path(__file__).resolve().parent.parent / "data")

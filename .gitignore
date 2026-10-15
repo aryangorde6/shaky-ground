@@ -8,3 +8,4 @@ __pycache__/
 
 # downloaded data and API caches (rebuilt by the loaders)
 data/
+.claude/

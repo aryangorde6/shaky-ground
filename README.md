@@ -12,14 +12,16 @@ Graph Hacks: Context for AI Agents (WeMakeDevs × FalkorDB), **Track 01: Agents 
 
 Lesné et al. 2006 (*Nature*, retracted 2024-06-24 over manipulated images), with its 2,767 loaded citers and the 4 papers the agent chose to expand:
 
-- **45 papers build on it.** In each, every link of a chain was judged FOUNDATIONAL or SUPPORTING from the citing paper's own sentences. For 11 of them the chain runs through another paper, and two models agreed that each later link relies on the part that came from Lesné.
+- **45 papers build on it.** In each, every link of a chain was judged FOUNDATIONAL or SUPPORTING from the citing paper's own sentences. For 10 of them the strongest chain runs through another paper, and two models agreed that each later link relies on the part that came from Lesné.
 - **2 of those 45 were retracted themselves:** *Cognitive effects of cell-derived and synthetically derived Aβ oligomers* (2010) and *Soluble α-Synuclein Is a Novel Modulator of Alzheimer's Disease Pathophysiology* (2012).
 - **868 cite it only in passing, and 11 dispute it.**
 - **3,304 are *not shown* either way,** because no citation sentence was available. They are never counted as clean.
 
 Example of a chain that does *not* carry: Mainardi et al. 2014 used "a lysis buffer adapted from Lesne et al. (2006)". Papers citing Mainardi's Aβ-oligomer results build on Lesné through it. Papers citing its brain-wave results don't, and both models said so.
 
-`python -m shaky.report 10.1038/nature04533` prints the full report, with the quoted sentence and the judging model for every link.
+`python -m shaky.report 10.1038/nature04533` prints the full report, with the quoted sentence and the judging model for every link. The web UI shows the same graph:
+
+![Shaky Ground web UI: one paper's chain to Lesné et al. 2006, with the citing sentence, the judging model and the carry check on every link](docs/chain.png)
 
 [![tests](https://github.com/aryangorde6/shaky-ground/actions/workflows/tests.yml/badge.svg)](https://github.com/aryangorde6/shaky-ground/actions/workflows/tests.yml)
 
@@ -70,6 +72,10 @@ uv run python -m shaky.foundation 10.1016/j.neuroscience.2007.10.054
 # 10. Median latency of the main queries, and the offline tests of the rules
 uv run python -m shaky.bench W2075481535
 uv run python -m unittest -v
+
+# 11. The web UI (http://127.0.0.1:8000), and the MCP server for AI agents (stdio)
+uv run python -m shaky.web
+uv run python -m shaky.mcp_server
 ```
 
 Every command takes a DOI (`10.…`, `doi:…`, `https://doi.org/…`), an OpenAlex ID or URL, or a PubMed ID (`pmid:…`). A title is refused rather than searched, because the closest match may be a different paper.
@@ -153,7 +159,7 @@ ORDER BY risk DESC LIMIT 1
 RETURN risk, nodes(p), relationships(p)
 ```
 
-**The two queries must agree.** `python -m shaky.risk W2075481535` reruns the propagation, then scores *every* chain of up to 3 links with `reduce()`. It checks that both stored numbers match on every paper: on Oct 15, with 9,043 papers loaded, **0 mismatches** (`risk` on 4,217 papers, `risk_proven` on 913). The propagation took 0.21 s; the brute force took 127.5 s.
+**The two queries must agree.** `python -m shaky.risk W2075481535` reruns the propagation, then scores *every* chain of up to 3 links with `reduce()`. It checks that both stored numbers match on every paper: on Oct 15, with 9,043 papers loaded, **0 mismatches** (`risk` on 4,217 papers, `risk_proven` on 913). The propagation took 0.22 s; the brute force took 131.7 s.
 
 We first used `algo.SPpaths` with `cost = −ln(weight)`, so that the shortest path is the riskiest chain. It worked for fixed weights. But a `weightProp` is one stored number per edge, while the carry rule depends on which retracted paper is the root. So `reduce()` replaced it.
 
@@ -163,11 +169,12 @@ We first used `algo.SPpaths` with `cost = −ln(weight)`, so that the shortest p
 
 | Query | Median |
 |---|---|
-| Propagate (writes both risk numbers for every paper, 3 hops) | 205 ms |
-| Blast radius: top 50 papers proven to build on the root (reads `:Contaminated`) | 1.1 ms |
-| Tiers: builds on / passing / not shown / disputes | 63 ms |
-| One paper's riskiest chain with evidence (`reduce()`, a 2-link chain) | 10.8 ms |
-| Agent frontier: 12 candidates to expand | 114 ms |
+| Propagate (writes both risk numbers for every paper, 3 hops) | 239 ms |
+| Blast radius: top 50 papers proven to build on the root (reads `:Contaminated`) | 1.2 ms |
+| Tiers: builds on / passing / not shown / disputes | 69 ms |
+| One paper's riskiest chain with evidence (`reduce()`, a 2-link chain) | 18.1 ms |
+| Agent frontier: 12 candidates to expand | 124 ms |
+| Web UI view: 141 papers, each one's chain, the 592 links among them (first build, 5 runs; then cached at 1.3 ms) | 1.11 s |
 
 ## The agent
 
@@ -189,6 +196,33 @@ Every pick and its reason is stored as `(:Investigation)-[:EXPLORED {round, reas
    - `NO RETRACTED WORK FOUND`: with what could not be checked;
    - `CLEAN · DEPTH 2`: only when every reference to depth 2 was checked;
    - `NO DATA`.
+
+## The web UI
+
+`python -m shaky.web` serves one page (no build step) and a small JSON API over the same queries.
+
+- **Blast radius.** The retracted paper sits at the centre. A paper sits on ring *k* when its strongest chain has *k* links, next to the paper the chain goes through, so every chain reads straight in. Colour is the tier (red retracted, orange builds on it, grey passing, green disputes it, dashed not shown). Link width is the weight; a dashed link has no sentence; a dotted one was shown not to carry the dependence on.
+- **Click a paper** to see its chain, each link with its sentence, the model that judged it, and the carry check: what the paper uses the cited one for, and what that one took from the retracted paper. **Click a link** to see every sentence behind it.
+- **Foundation check tab:** past checks with their chains, and a new check for any DOI.
+- Built on the Python standard library's HTTP server and one static page with [Cytoscape.js](https://js.cytoscape.org) (pinned, with a subresource-integrity hash). Titles and sentences from papers are always set as text, never as HTML.
+- `ALLOW_RUNS=0` makes it read only, for a public deployment: it then shows stored results and never spends API credits or model calls.
+
+## The MCP server
+
+`python -m shaky.mcp_server` lets any AI agent check a paper before citing it. It speaks the Model Context Protocol over stdio, also with the standard library only. Register it with an MCP client:
+
+```json
+{"mcpServers": {"shaky-ground": {"command": "uv",
+  "args": ["run", "--directory", "/path/to/shaky-ground", "python", "-m", "shaky.mcp_server"]}}}
+```
+
+| Tool | What it returns |
+|---|---|
+| `check_foundations(paper, fresh=false)` | The verdict, each retracted paper within 2 links with its chain and quoted evidence, and the coverage. The stored check, unless `fresh` |
+| `retraction_blast_radius(paper, limit=20)` | The tier counts, the papers that build on it (chain length, risk), the disputes, and the agent's reasons |
+| `explain_chain(paper, retracted)` | The proven and the possible chain, each link with its class, weight, sentence, model and carry votes |
+
+Bad input gets an error that says what is wrong (a title instead of an ID, a missing argument), never a guess.
 
 ## Limits
 
