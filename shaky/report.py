@@ -109,9 +109,9 @@ def build(g: Graph, root_id: str, limit: int = 30) -> str:
     out += ["## Answer", "",
             f"- **{t['builds_on']} papers build on it**: each has a chain of citations in which every link was judged "
             f"FOUNDATIONAL (uses its method, data or result) or SUPPORTING (relies on its finding), from the citing "
-            f"paper's own sentences. {direct} cite it directly"
-            + (f"; {t['builds_on'] - direct} through another paper, where two models agreed that they rely on the "
-               f"part of that paper that came from it." if t['builds_on'] > direct else "."),
+            f"paper's own sentences. For {direct}, the strongest chain is a direct citation"
+            + (f"; for {t['builds_on'] - direct}, it runs through another paper, and two models agreed that they rely "
+               f"on the part of that paper that came from it." if t['builds_on'] > direct else "."),
             f"- **{retracted_builders} of those were themselves retracted.**",
             f"- **{t['passing']:,} cite it only in passing**: every chain with evidence has a BACKGROUND link.",
             f"- **{t['disputes']} dispute it** or report the concerns about it.",
@@ -131,11 +131,12 @@ def build(g: Graph, root_id: str, limit: int = 30) -> str:
         flag = " · **RETRACTED**" if pretracted else ""
         out.append(f"### {_title(ptitle)} ({pyear}){flag}")
         out.append(f"[{pid}](https://openalex.org/{pid}) · cited by {pcited:,} · chain risk {c['risk']:.2f}" if c else pid)
-        for i, link in enumerate(c["links"] if c else []):
+        links = c["links"] if c else []
+        for i, link in enumerate(links):
             cited = c["papers"][i + 1]
             out.append(f"- **{link['cls']}** → *{_title(cited['title'])[:80]}* ({cited['year']}): {_q(link['evidence'])} "
                        f"· judged by `{_model(link['judged_by'])}`")
-            if i > 0:
+            if i < len(links) - 1:      # every link but the last one into the root needs the carry check
                 votes = ", ".join(link["carry_votes"] or [])
                 out.append(f"  - relies on the part that came from the retracted paper ({votes}): "
                            f"{_q(link['carry_evidence'], 200)}")

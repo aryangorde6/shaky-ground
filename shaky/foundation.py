@@ -140,10 +140,11 @@ def summary(r: dict) -> str:
         lines.append(f"  {r['why']}")
     for a in r.get("retracted_ancestors", []):
         lines.append(f"- {a['tier']}: {a['title']} ({a['year']}) {a['id']}")
-        for i, link in enumerate((a["chain"] or {}).get("links", [])):
+        links = (a["chain"] or {}).get("links", [])
+        for i, link in enumerate(links):
             cited = a["chain"]["papers"][i + 1]
             lines.append(f"    {link['cls']} -> {(cited['title'] or '')[:70]}: \"{(link['evidence'] or 'no citation sentence')[:160]}\"")
-            if i > 0 and link.get("carry_votes"):
+            if i < len(links) - 1 and link.get("carry_votes"):
                 lines.append(f"      carries? {', '.join(link['carry_votes'])}")
     if "coverage" in r:
         c = r["coverage"]
