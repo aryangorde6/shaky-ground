@@ -15,15 +15,19 @@ Verdicts, never stronger than the evidence:
     NO DATA                   OpenAlex has no reference list for the paper
 
     uv run python -m shaky.foundation 10.1016/j.neuroscience.2007.10.054
+    uv run python -m shaky.foundation --list references.bib     # every DOI in a reference list
 """
 import argparse
 import json
+import pathlib
+import re
 import uuid
 from datetime import datetime, timezone
 
 from falkordb import Graph
 
 from . import carry, db, evidence, judge, load, openalex, resolve, risk
+from .fetch import FetchError
 
 DEPTH = 2
 ORDER = ["RESTS ON RETRACTED WORK", "NOT PROVEN", "CITES RETRACTED WORK"]   # worst first
@@ -173,14 +177,93 @@ def summary(r: dict) -> str:
     return "\n".join(lines)
 
 
+BIB_ENTRY = re.compile(r"^\s*@\s*(?!comment|string|preamble)\w+\s*\{", re.IGNORECASE | re.MULTILINE)
+
+
+def dois_in(text: str) -> tuple[list[str], int]:
+    """The DOIs in a pasted reference list or BibTeX file, in order and without repeats, and how many
+    BibTeX entries carry none (those can't be looked up, so they are reported as not checked)."""
+    found = []
+    for m in resolve.DOI.finditer(text):
+        doi = m.group(1).rstrip(".,;)]}\"'").lower()
+        if doi not in found:
+            found.append(doi)
+    return found, sum(1 for e in _bib_entries(text) if not resolve.DOI.search(e))
+
+
+def _bib_entries(text: str) -> list[str]:
+    """Each BibTeX entry's text, from @type{ to its matching closing brace."""
+    out = []
+    for m in BIB_ENTRY.finditer(text):
+        depth, i = 0, m.end() - 1
+        for i in range(m.end() - 1, len(text)):
+            depth += {"{": 1, "}": -1}.get(text[i], 0)
+            if depth == 0:
+                break
+        out.append(text[m.start():i + 1])
+    return out
+
+
+def check_list(g: Graph, text: str, max_credits: int = 200, **kw) -> dict:
+    """A foundation check of every reference in a list, within one OpenAlex credit budget. The list's
+    verdict is its worst entry's; entries that could not be checked are counted, never cleared."""
+    dois, no_doi = dois_in(text)
+    if not dois:
+        raise resolve.ResolveError("no DOIs found: paste a reference list or BibTeX with DOIs in it")
+    entries, left = [], max_credits
+    for doi in dois:
+        if left <= 0:
+            entries.append({"doi": doi, "verdict": "NOT CHECKED", "why": "credit budget used up"})
+            continue
+        try:
+            r = check(g, doi, max_credits=left, **kw)
+        except (resolve.ResolveError, FetchError) as e:
+            entries.append({"doi": doi, "verdict": "NOT CHECKED", "why": str(e)})
+            continue
+        left -= r["credits"]
+        entries.append({"doi": doi, "id": r["paper"]["id"], "title": r["paper"]["title"], "verdict": r["verdict"],
+                        "paper_retracted": r["paper_retracted"], "investigation": r["investigation"],
+                        "retracted_ancestors": len(r["retracted_ancestors"])})
+    worst = ["RESTS ON RETRACTED WORK", "NOT PROVEN", "CITES RETRACTED WORK"]
+    verdicts = [e["verdict"] for e in entries]
+    retracted = sum(1 for e in entries if e.get("paper_retracted"))
+    overall = next((v for v in worst if v in verdicts), None)
+    if overall is None:
+        overall = "NO RETRACTED WORK FOUND" if verdicts.count(f"CLEAN · DEPTH {DEPTH}") < len(entries) or no_doi \
+            else f"CLEAN · DEPTH {DEPTH}"
+    return {"verdict": overall, "references": len(dois) + no_doi, "with_doi": len(dois), "without_doi": no_doi,
+            "cited_papers_retracted": retracted, "counts": {v: verdicts.count(v) for v in dict.fromkeys(verdicts)},
+            "entries": entries, "credits": max_credits - left}
+
+
+def list_summary(r: dict) -> str:
+    lines = [f"VERDICT for the list: {r['verdict']}",
+             f"{r['references']} references: {r['with_doi']} with a DOI, {r['without_doi']} without (not checked); "
+             f"{r['cited_papers_retracted']} of the cited papers are retracted themselves. Credits: {r['credits']}."]
+    for e in r["entries"]:
+        lines.append(f"- {e['verdict']}: {(e.get('title') or e['doi'])[:80]} ({e['doi']})"
+                     + (" · ITSELF RETRACTED" if e.get("paper_retracted") else "")
+                     + (f" · {e['why']}" if e.get("why") else ""))
+    return "\n".join(lines)
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("paper", help="a DOI, OpenAlex ID or PubMed ID")
-    ap.add_argument("--credits", type=int, default=50, help="OpenAlex credits this check may spend")
+    ap.add_argument("paper", nargs="?", help="a DOI, OpenAlex ID or PubMed ID")
+    ap.add_argument("--list", metavar="FILE", help="check every DOI in a reference list or BibTeX file instead")
+    ap.add_argument("--credits", type=int, default=50, help="OpenAlex credits this check may spend (the whole list's budget with --list)")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
+    if bool(args.paper) == bool(args.list):
+        ap.error("give either a paper or --list FILE")
     try:
-        result = check(db.graph(), args.paper, max_credits=args.credits)
+        if args.list:
+            result = check_list(db.graph(), pathlib.Path(args.list).read_text(), max_credits=args.credits)
+        else:
+            result = check(db.graph(), args.paper, max_credits=args.credits)
     except resolve.ResolveError as e:
         raise SystemExit(str(e))
-    print(json.dumps(result, indent=1, default=str) if args.json else summary(result))
+    if args.json:
+        print(json.dumps(result, indent=1, default=str))
+    else:
+        print(list_summary(result) if args.list else summary(result))

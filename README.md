@@ -68,6 +68,7 @@ uv run python -m shaky.agent 10.1038/nature04533 --rounds 2 --per-round 2 --cred
 # 9. The blast-radius report, and a foundation check for any paper
 uv run python -m shaky.report 10.1038/nature04533 --out data/reports/lesne.md
 uv run python -m shaky.foundation 10.1016/j.neuroscience.2007.10.054
+uv run python -m shaky.foundation --list references.bib --credits 200   # every DOI in a reference list
 
 # 10. Median latency of the main queries, and the offline tests of the rules
 uv run python -m shaky.bench W2075481535
@@ -196,6 +197,7 @@ Every pick and its reason is stored as `(:Investigation)-[:EXPLORED {round, reas
    - `NO RETRACTED WORK FOUND`: with what could not be checked;
    - `CLEAN · DEPTH 2`: only when every reference to depth 2 was checked;
    - `NO DATA`.
+4. With `--list`, it checks every DOI in a BibTeX file or a pasted reference list within one credit budget. The list gets its worst entry's verdict, and entries without a DOI are counted as not checked.
 
 ## The web UI
 

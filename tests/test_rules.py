@@ -4,7 +4,7 @@
 """
 import unittest
 
-from shaky import carry, judge, mcp_server, resolve, risk
+from shaky import carry, foundation, judge, mcp_server, resolve, risk
 from shaky.reliance import WEIGHTS
 
 
@@ -28,6 +28,23 @@ class ResolveShapes(unittest.TestCase):
         for text in ["", "A specific amyloid-beta protein assembly in the brain impairs memory", "W12x", "pmid:"]:
             with self.assertRaises(resolve.ResolveError, msg=text):
                 resolve.lookup_key(text)
+
+
+class ReferenceLists(unittest.TestCase):
+    def test_dois_in_bibtex_and_text(self):
+        bib = """@article{a, title={X}, doi = {10.1016/j.neuroscience.2007.10.054},}
+@article{b, title={Y}, doi="10.1109/CVPR.2016.90"}
+@book{c, title={No {DOI} here}}
+@comment{ignored}
+Also cited: https://doi.org/10.1016/j.expneurol.2016.06.006. Again: 10.1016/J.NEUROSCIENCE.2007.10.054"""
+        dois, without = foundation.dois_in(bib)
+        self.assertEqual(dois, ["10.1016/j.neuroscience.2007.10.054", "10.1109/cvpr.2016.90",
+                                "10.1016/j.expneurol.2016.06.006"])
+        self.assertEqual(without, 1)     # entry c; the DOI after it belongs to no entry
+
+    def test_nothing_to_check_is_refused(self):
+        with self.assertRaises(resolve.ResolveError):
+            foundation.check_list(None, "just some words, no references")
 
 
 class Reliance(unittest.TestCase):
