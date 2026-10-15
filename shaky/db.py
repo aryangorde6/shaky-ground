@@ -9,6 +9,7 @@ INDEXES = [
     ("Paper", "id"),          # OpenAlex work ID, e.g. W2075481535
     ("Paper", "doi"),         # look papers up by DOI
     ("Retraction", "record_id"),
+    ("Investigation", "id"),  # stored checks and agent runs, opened by ID
 ]
 
 

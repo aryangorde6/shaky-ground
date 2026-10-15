@@ -18,6 +18,7 @@ import urllib.request
 from . import config, db, risk, snapshot
 
 CLOUD_FREE_MB = 100
+QUERY_HEADROOM_MB = 20     # query memory comes out of the same 100 MB (FalkorDB on Discord, Oct 15)
 results: list[tuple[bool, str]] = []
 
 
@@ -86,7 +87,9 @@ def main() -> None:
     try:
         mem = client.connection.execute_command("GRAPH.MEMORY", "USAGE", config.GRAPH_NAME)
         size = dict(zip(mem[::2], mem[1::2])).get(b"total_graph_sz_mb", dict(zip(mem[::2], mem[1::2])).get("total_graph_sz_mb"))
-        check(int(size) < CLOUD_FREE_MB, f"graph uses {int(size)} MB (FalkorDB Cloud free tier: {CLOUD_FREE_MB} MB)")
+        check(int(size) <= CLOUD_FREE_MB - QUERY_HEADROOM_MB,
+              f"graph uses {int(size)} MB of FalkorDB Cloud's free {CLOUD_FREE_MB} MB "
+              f"(at most {CLOUD_FREE_MB - QUERY_HEADROOM_MB}, leaving room for query memory)")
     except Exception as e:
         print(f"  (memory not reported by this server: {type(e).__name__})")
 

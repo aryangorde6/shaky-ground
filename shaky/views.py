@@ -15,6 +15,11 @@ from . import config, foundation, report, resolve, risk
 TTL = 120          # seconds a blast-radius view is reused while the graph's counts stay the same
 _cache: dict = {}
 _writes = threading.Lock()     # one write job at a time: risk is stored for one root at a time
+_building = threading.Lock()   # one view build at a time: visitors who arrive together wait for one build
+# Query memory counts against FalkorDB Cloud's 100 MB too (FalkorDB on Discord, Oct 15), so reads are
+# bounded: each has a timeout, and a view build runs at most PARALLEL of them at once.
+TIMEOUT_MS = 15_000
+PARALLEL = 4
 
 NODE = """p.id, p.title, p.year, p.cited_by, p.retracted, p.is_review, p.type, p.venue, p.doi,
           p.risk, p.risk_proven, p.risk_root, p.expanded_at"""
@@ -57,7 +62,7 @@ class NotAllowed(PermissionError):
 
 
 def _rows(g: Graph, query: str, **params) -> list:
-    return g.ro_query(query, params).result_set
+    return g.ro_query(query, params, timeout=TIMEOUT_MS).result_set
 
 
 def _papers(g: Graph, ids) -> dict[str, dict]:
@@ -112,9 +117,23 @@ def blast(g: Graph, root_id: str, passing: int = 40, not_shown: int = 25) -> dic
     retracted paper downstream, every dispute, the most-cited passing and not-shown papers, and each
     one's riskiest chain to the root."""
     ensure_root(g, root_id)
-    key, stamp = (root_id, passing, not_shown), _stamp(g)
-    if (hit := _cache.get(key)) and hit[0] == stamp and time.time() - hit[1] < TTL:
-        return hit[2]
+    key = (root_id, passing, not_shown)
+
+    def cached():
+        stamp = _stamp(g)
+        hit = _cache.get(key)
+        return stamp, (hit[2] if hit and hit[0] == stamp and time.time() - hit[1] < TTL else None)
+
+    stamp, view = cached()
+    if view is None:
+        with _building:
+            stamp, view = cached()      # built by a visitor who was first
+            if view is None:
+                view = _build(g, root_id, passing, not_shown, stamp)
+    return view
+
+
+def _build(g: Graph, root_id: str, passing: int, not_shown: int, stamp: tuple) -> dict:
     start = time.perf_counter()
     q = lambda query, **p: _rows(g, query, root=root_id, **p)
 
@@ -135,7 +154,7 @@ def blast(g: Graph, root_id: str, passing: int = 40, not_shown: int = 25) -> dic
         return pid, variant, risk.chain(g, pid, root_id, variant)
 
     chains, on_chain = {}, set()
-    with ThreadPoolExecutor(8) as pool:    # independent read queries; FalkorDB runs them in parallel
+    with ThreadPoolExecutor(PARALLEL) as pool:    # independent read queries; FalkorDB runs them in parallel
         found = list(pool.map(best, picked))
     for pid, variant, c in found:
         if c:
@@ -181,7 +200,7 @@ def blast(g: Graph, root_id: str, passing: int = 40, not_shown: int = 25) -> dic
         "investigations": investigations(g, root_id),
         "computed_ms": round((time.perf_counter() - start) * 1000),
     }
-    _cache[key] = (stamp, time.time(), view)
+    _cache[(root_id, passing, not_shown)] = (stamp, time.time(), view)
     return view
 
 

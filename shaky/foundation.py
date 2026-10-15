@@ -109,27 +109,27 @@ def check(g: Graph, text: str, providers=("groq", "gemini"), batch: int = 12, ma
     coverage = _load(g, p, max_credits)
 
     ancestors = []
-    for rid, rtitle, ryear in g.ro_query(ANCESTORS, {"id": pid}).result_set:
-        middles = g.ro_query(MIDDLE, {"id": pid, "r": rid}).result_set
+    for rid, rtitle, ryear in g.ro_query(ANCESTORS, {"id": pid}, timeout=30_000).result_set:
+        middles = g.ro_query(MIDDLE, {"id": pid, "r": rid}, timeout=30_000).result_set
         # Evidence and judgments for the links into R, from P and from the papers in between ...
         _evidence(g, rid, [pid, *[m[0] for m in middles]], list(providers), batch)
         # ... then for P's links to the papers in between whose link to R could still matter
         # (a BACKGROUND or CRITICAL link caps the chain below the bar, so those are skipped) ...
-        middles = g.ro_query(MIDDLE, {"id": pid, "r": rid}).result_set
+        middles = g.ro_query(MIDDLE, {"id": pid, "r": rid}, timeout=30_000).result_set
         for x, _, onward, *_ in middles:
             if onward in ("FOUNDATIONAL", "SUPPORTING", "UNKNOWN"):
                 _evidence(g, x, [pid], list(providers), batch)
         # ... and, where both links are strong, whether P relies on the part of the middle paper
         # that came from R (two votes).
         groups = []
-        for x, cls, onward, contexts, ptitle in g.ro_query(MIDDLE, {"id": pid, "r": rid}).result_set:
+        for x, cls, onward, contexts, ptitle in g.ro_query(MIDDLE, {"id": pid, "r": rid}, timeout=30_000).result_set:
             if cls in ("FOUNDATIONAL", "SUPPORTING") and onward in ("FOUNDATIONAL", "SUPPORTING") and contexts:
                 if grp := carry.group(g, x, rid, [(pid, ptitle, contexts)]):
                     groups.append(grp)
         if groups:
             carry.judge_groups(g, rid, groups)
         tier, ch = _tier(g, pid, rid)
-        direct = g.ro_query(DIRECT, {"id": pid, "r": rid}).result_set
+        direct = g.ro_query(DIRECT, {"id": pid, "r": rid}, timeout=30_000).result_set
         ancestors.append({"id": rid, "title": rtitle, "year": ryear, "tier": tier, "chain": ch,
                           "direct_link": direct[0][0] if direct else None})
 

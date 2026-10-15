@@ -35,6 +35,10 @@ CSP = ("default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; "
        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; "
        "img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'")
 MAX_BODY = {"/api/check": 10_000, "/api/list": 300_000}
+# At most this many API requests touch the graph at once; the rest wait their turn. Query memory counts
+# against FalkorDB Cloud's 100 MB, so a burst of visitors must not run a burst of queries.
+SLOTS = threading.BoundedSemaphore(int(os.getenv("API_SLOTS", "4")))
+SLOT_WAIT = 30
 
 graph = db.graph()
 
@@ -70,6 +74,8 @@ class Handler(BaseHTTPRequestHandler):
         self._send(status, json.dumps(data, default=str).encode(), "application/json")
 
     def _api(self, fn) -> None:
+        if not SLOTS.acquire(timeout=SLOT_WAIT):
+            return self._json(503, {"error": "the server is busy; try again in a moment"})
         try:
             self._json(200, fn())
         except ResolveError as e:
@@ -81,6 +87,8 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:      # details go to the server log, not to the page
             traceback.print_exc()
             self._json(500, {"error": "something went wrong on the server; see its log"})
+        finally:
+            SLOTS.release()
 
     def do_GET(self) -> None:
         url = urlparse(self.path)

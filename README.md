@@ -166,16 +166,16 @@ We first used `algo.SPpaths` with `cost = −ln(weight)`, so that the shortest p
 
 ### Latency
 
-`python -m shaky.bench W2075481535`, on a laptop with FalkorDB in Docker. Graph: 9,043 papers, 109,774 citations (Oct 15). Median of 20 runs:
+`python -m shaky.bench W2075481535`, on a laptop with FalkorDB in Docker. Graph: 10,852 papers, 147,434 citations (Oct 15, 15:37 IST). Median of 20 runs:
 
 | Query | Median |
 |---|---|
-| Propagate (writes both risk numbers for every paper, 3 hops) | 216 ms |
-| Blast radius: top 50 papers proven to build on the root (reads `:Contaminated`) | 1.8 ms |
-| Tiers: builds on / passing / not shown / disputes | 75 ms |
-| One paper's riskiest chain with evidence (`reduce()`, a 2-link chain) | 13.2 ms |
-| Agent frontier: 12 candidates to expand | 128 ms |
-| Web UI view: 141 papers, each one's chain, the 592 links among them (first build, 5 runs; then cached at 1.3 ms) | 1.14 s |
+| Propagate (writes both risk numbers for every paper, 3 hops) | 271.7 ms |
+| Blast radius: top 50 papers proven to build on the root (reads `:Contaminated`) | 1.3 ms |
+| Tiers: builds on / passing / not shown / disputes | 95.4 ms |
+| One paper's riskiest chain with evidence (`reduce()`) | 22.3 ms |
+| Agent frontier: 12 candidates to expand | 142.5 ms |
+| Web UI view: 141 papers, each one's chain, the 592 links among them (first build, at most 4 queries in parallel, median of 5; then cached at 1.4 ms) | 2.62 s |
 
 ## The agent
 
@@ -208,6 +208,7 @@ Every pick and its reason is stored as `(:Investigation)-[:EXPLORED {round, reas
 - **Foundation check tab:** past checks with their chains, a new check for any DOI, and a box for a whole reference list (BibTeX or pasted text). The list is drawn as a graph: your list, its references, and the retracted papers they lead to.
 - Built on the Python standard library's HTTP server and one static page with [Cytoscape.js](https://js.cytoscape.org) (pinned, with a subresource-integrity hash) and open-licence fonts from Google Fonts. Titles and sentences from papers are always set as text, never as HTML.
 - `ALLOW_RUNS=0` makes it read only, for a public deployment: it then shows stored results and never spends API credits or model calls.
+- **Bounded reads.** On FalkorDB Cloud's free tier, query memory counts against the same 100 MB as the data, so a burst of visitors must not become a burst of queries: every read has a timeout (15 s), at most 4 API requests touch the graph at once, a view build runs at most 4 queries in parallel, and visitors who arrive together wait for one build instead of each starting their own.
 - **Deploying:** [docs/DEPLOY.md](docs/DEPLOY.md). `shaky.snapshot` copies the graph without the raw reference lists (29 MB instead of 113 MB, so it fits FalkorDB Cloud's free tier), the `Dockerfile` runs the UI on a Hugging Face Space, and `shaky.preflight` checks the deployment against the snapshot before a demo.
 
 ## The MCP server
