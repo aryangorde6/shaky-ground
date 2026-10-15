@@ -27,7 +27,7 @@ MATCH (d:Paper)-[:CITES {cls: 'CRITICAL'}]->(:Paper {id: $root}) WHERE d.type <>
 
 TOP_PASSING = """
 MATCH (p:Paper) WHERE p.risk_root = $root AND p.id <> $root AND p.risk_proven > 0 AND p.risk_proven < $t
-RETURN p.id ORDER BY p.cited_by DESC LIMIT $n
+RETURN p.id ORDER BY p.cited_by DESC, p.id LIMIT $n
 """
 
 LINKS_AMONG = """

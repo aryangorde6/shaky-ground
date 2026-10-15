@@ -32,7 +32,7 @@ RETURN p.id, p.title, p.year ORDER BY p.expanded_at
 
 BUILDS_ON = """
 MATCH (p:Contaminated) WHERE p.risk_root = $root
-RETURN p.id, p.title, p.year, p.cited_by, p.retracted ORDER BY p.cited_by DESC
+RETURN p.id, p.title, p.year, p.cited_by, p.retracted ORDER BY p.cited_by DESC, p.id
 """
 
 RETRACTED_DOWNSTREAM = """
@@ -49,7 +49,7 @@ RETURN d.title, d.year, d.type, c.evidence, c.judged_by ORDER BY d.year
 NOT_SHOWN = """
 MATCH (p:Paper) WHERE p.risk_root = $root AND p.id <> $root AND coalesce(p.risk_proven, 0) = 0
 OPTIONAL MATCH (p)-[c:CITES]->(:Paper {id: $root})
-RETURN p.id, p.title, p.year, p.cited_by, p.is_review, c IS NOT NULL ORDER BY p.cited_by DESC LIMIT $n
+RETURN p.id, p.title, p.year, p.cited_by, p.is_review, c IS NOT NULL ORDER BY p.cited_by DESC, p.id LIMIT $n
 """
 
 EXPLORED = """

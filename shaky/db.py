@@ -12,14 +12,17 @@ INDEXES = [
 ]
 
 
-def graph() -> Graph:
-    db = FalkorDB(
+def client() -> FalkorDB:
+    return FalkorDB(
         host=config.FALKORDB_HOST,
         port=config.FALKORDB_PORT,
         username=config.FALKORDB_USERNAME,
         password=config.FALKORDB_PASSWORD,
     )
-    return db.select_graph(config.GRAPH_NAME)
+
+
+def graph() -> Graph:
+    return client().select_graph(config.GRAPH_NAME)
 
 
 def existing_indexes(g: Graph) -> set[tuple[str, str]]:

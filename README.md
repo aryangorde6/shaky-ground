@@ -169,12 +169,12 @@ We first used `algo.SPpaths` with `cost = −ln(weight)`, so that the shortest p
 
 | Query | Median |
 |---|---|
-| Propagate (writes both risk numbers for every paper, 3 hops) | 239 ms |
-| Blast radius: top 50 papers proven to build on the root (reads `:Contaminated`) | 1.2 ms |
-| Tiers: builds on / passing / not shown / disputes | 69 ms |
-| One paper's riskiest chain with evidence (`reduce()`, a 2-link chain) | 18.1 ms |
-| Agent frontier: 12 candidates to expand | 124 ms |
-| Web UI view: 141 papers, each one's chain, the 592 links among them (first build, 5 runs; then cached at 1.3 ms) | 1.11 s |
+| Propagate (writes both risk numbers for every paper, 3 hops) | 216 ms |
+| Blast radius: top 50 papers proven to build on the root (reads `:Contaminated`) | 1.8 ms |
+| Tiers: builds on / passing / not shown / disputes | 75 ms |
+| One paper's riskiest chain with evidence (`reduce()`, a 2-link chain) | 13.2 ms |
+| Agent frontier: 12 candidates to expand | 128 ms |
+| Web UI view: 141 papers, each one's chain, the 592 links among them (first build, 5 runs; then cached at 1.3 ms) | 1.14 s |
 
 ## The agent
 
@@ -206,6 +206,7 @@ Every pick and its reason is stored as `(:Investigation)-[:EXPLORED {round, reas
 - **Foundation check tab:** past checks with their chains, and a new check for any DOI.
 - Built on the Python standard library's HTTP server and one static page with [Cytoscape.js](https://js.cytoscape.org) (pinned, with a subresource-integrity hash). Titles and sentences from papers are always set as text, never as HTML.
 - `ALLOW_RUNS=0` makes it read only, for a public deployment: it then shows stored results and never spends API credits or model calls.
+- **Deploying:** [docs/DEPLOY.md](docs/DEPLOY.md). `shaky.snapshot` copies the graph without the raw reference lists (21 MB instead of 93 MB, so it fits FalkorDB Cloud's free tier), the `Dockerfile` runs the UI on a Hugging Face Space, and `shaky.preflight` checks the deployment against the snapshot before a demo.
 
 ## The MCP server
 

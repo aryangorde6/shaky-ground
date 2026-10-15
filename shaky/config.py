@@ -4,7 +4,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
+# ENV_FILE picks another settings file, e.g. ENV_FILE=.env.cloud for the deployment's database
+load_dotenv(os.getenv("ENV_FILE") or None)
 
 FALKORDB_HOST = os.getenv("FALKORDB_HOST", "localhost")
 FALKORDB_PORT = int(os.getenv("FALKORDB_PORT", "6379"))
