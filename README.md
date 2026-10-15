@@ -15,7 +15,7 @@ Lesné et al. 2006 (*Nature*, retracted 2024-06-24 over manipulated images), wit
 - **45 papers build on it.** In each, every link of a chain was judged FOUNDATIONAL or SUPPORTING from the citing paper's own sentences. For 10 of them the strongest chain runs through another paper, and two models agreed that each later link relies on the part that came from Lesné.
 - **2 of those 45 were retracted themselves:** *Cognitive effects of cell-derived and synthetically derived Aβ oligomers* (2010) and *Soluble α-Synuclein Is a Novel Modulator of Alzheimer's Disease Pathophysiology* (2012).
 - **868 cite it only in passing, and 11 dispute it.**
-- **3,304 are *not shown* either way,** because no citation sentence was available. They are never counted as clean.
+- **3,373 are *not shown* either way,** because no citation sentence was available. They are never counted as clean.
 
 Example of a chain that does *not* carry: Mainardi et al. 2014 used "a lysis buffer adapted from Lesne et al. (2006)". Papers citing Mainardi's Aβ-oligomer results build on Lesné through it. Papers citing its brain-wave results don't, and both models said so.
 
@@ -160,22 +160,22 @@ ORDER BY risk DESC LIMIT 1
 RETURN risk, nodes(p), relationships(p)
 ```
 
-**The two queries must agree.** `python -m shaky.risk W2075481535` reruns the propagation, then scores *every* chain of up to 3 links with `reduce()`. It checks that both stored numbers match on every paper: on Oct 15, with 9,043 papers loaded, **0 mismatches** (`risk` on 4,217 papers, `risk_proven` on 913). The propagation took 0.22 s; the brute force took 131.7 s.
+**The two queries must agree.** `python -m shaky.risk W2075481535` reruns the propagation, then scores *every* chain of up to 3 links with `reduce()`. It checks that both stored numbers match on every paper: on Oct 15 (15:43 IST), with 10,852 papers loaded, **0 mismatches** (`risk` on 4,286 papers, `risk_proven` on 913). The propagation took 0.45 s; the brute force took 287.8 s.
 
 We first used `algo.SPpaths` with `cost = −ln(weight)`, so that the shortest path is the riskiest chain. It worked for fixed weights. But a `weightProp` is one stored number per edge, while the carry rule depends on which retracted paper is the root. So `reduce()` replaced it.
 
 ### Latency
 
-`python -m shaky.bench W2075481535`, on a laptop with FalkorDB in Docker. Graph: 10,852 papers, 147,434 citations (Oct 15, 15:37 IST). Median of 20 runs:
+`python -m shaky.bench W2075481535`, on a laptop with FalkorDB in Docker. Graph: 10,852 papers, 147,434 citations (Oct 15, 16:47 IST). Median of 20 runs:
 
 | Query | Median |
 |---|---|
-| Propagate (writes both risk numbers for every paper, 3 hops) | 271.7 ms |
+| Propagate (writes both risk numbers for every paper, 3 hops) | 240.7 ms |
 | Blast radius: top 50 papers proven to build on the root (reads `:Contaminated`) | 1.3 ms |
-| Tiers: builds on / passing / not shown / disputes | 95.4 ms |
-| One paper's riskiest chain with evidence (`reduce()`) | 22.3 ms |
-| Agent frontier: 12 candidates to expand | 142.5 ms |
-| Web UI view: 141 papers, each one's chain, the 592 links among them (first build, at most 4 queries in parallel, median of 5; then cached at 1.4 ms) | 2.62 s |
+| Tiers: builds on / passing / not shown / disputes | 92.1 ms |
+| One paper's riskiest chain with evidence (`reduce()`) | 20.2 ms |
+| Agent frontier: 12 candidates to expand | 124.5 ms |
+| Web UI view: 141 papers, each one's chain, the 583 links among them (first build, at most 4 queries in parallel, median of 5; then cached at 1.3 ms) | 2.50 s |
 
 ## The agent
 
