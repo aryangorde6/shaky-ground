@@ -10,6 +10,12 @@ Graph Hacks: Context for AI Agents (WeMakeDevs × FalkorDB), **Track 01: Agents 
 
 > Work in progress during the hackathon (Oct 15–18, 2026).
 
+## Try it in two minutes
+
+1. **Open the [live demo](https://shaky-ground-production.up.railway.app).** The red dot in the middle is Lesné et al. 2006 (*Nature*, retracted 2024). Each ring is one more citation away, and the orange papers build on it.
+2. **Follow a chain through another paper.** In the side panel, under *Papers that build on it*, click *Amyloid β oligomers in Alzheimer's disease pathogenesis, treatment, and diagnosis* (2015, marked "2 links"). Its chain runs through Mainardi et al. 2014. Each link shows the citing sentence and the model that judged it, and the carry check shows both models agreeing that the 2015 paper relies on what Mainardi took from Lesné: its lysis buffer and antibodies for measuring Aβ oligomers.
+3. **Check one paper's foundations, the other way round.** [This stored foundation check](https://shaky-ground-production.up.railway.app/?mode=check&id=baedff01) of a 2016 paper finds 5 retracted papers within two citations and grades each one: it *rests on* Lesné (the same lysis buffer), while the others are *not proven* or only *cited*. The *Foundation check* tab also takes a whole reference list. The live site is read only, so it reuses stored checks and marks any other reference *not checked*, never clean.
+
 ## What it found for one retracted paper
 
 Lesné et al. 2006 (*Nature*, retracted 2024-06-24 over manipulated images), with its 2,767 loaded citers and the 4 papers the agent chose to expand:
