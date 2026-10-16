@@ -81,7 +81,9 @@ uv run python -m shaky.web
 uv run python -m shaky.mcp_server
 ```
 
-Every command takes a DOI (`10.…`, `doi:…`, `https://doi.org/…`), an OpenAlex ID or URL, or a PubMed ID (`pmid:…`). A title is refused rather than searched, because the closest match may be a different paper.
+`load`, `agent`, `report` and `foundation` take a DOI (`10.…`, `doi:…`, `https://doi.org/…`), an OpenAlex ID or URL, or a PubMed ID (`pmid:…`), and so do the web UI and the MCP server. A title is refused rather than searched, because the closest match may be a different paper. `evidence`, `judge`, `carry`, `risk` and `bench` work on a paper already in the graph and take its OpenAlex ID (`W2075481535` above).
+
+Which module calls which, from each entry point to what it writes in the graph: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 FalkorDB Browser: http://localhost:3000
 

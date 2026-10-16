@@ -3,8 +3,9 @@
     uv run python -m unittest -v
 """
 import unittest
+from unittest import mock
 
-from shaky import carry, foundation, judge, mcp_server, resolve, risk
+from shaky import carry, config, foundation, judge, mcp_server, resolve, risk, views
 from shaky.reliance import WEIGHTS
 
 
@@ -83,6 +84,11 @@ Also cited: https://doi.org/10.1016/j.expneurol.2016.06.006. Again: 10.1016/J.NE
         r = foundation.check_list(None, "10.1000/one", stored=lambda doi: clean, run=False)
         self.assertEqual(r["verdict"], "NO RETRACTED WORK FOUND")
 
+    def test_read_only_server_refuses_a_new_check(self):
+        with mock.patch.object(config, "ALLOW_RUNS", False), self.assertRaises(views.NotAllowed) as e:
+            views.run_check(None, "10.1000/one")
+        self.assertNotIn("ALLOW_RUNS", str(e.exception))
+
 
 class Reliance(unittest.TestCase):
     def test_count_refs(self):
@@ -152,6 +158,11 @@ class McpProtocol(unittest.TestCase):
         self.assertTrue(r["result"]["isError"])
         self.assertIn("missing ['retracted']", r["result"]["content"][0]["text"])
         self.assertIn("unknown ['limit']", r["result"]["content"][0]["text"])
+        for limit, problem in ((0, "out of range ['limit']"), (101, "out of range ['limit']"), (True, "wrong type ['limit']")):
+            r = mcp_server.handle({"jsonrpc": "2.0", "id": 6, "method": "tools/call",
+                                   "params": {"name": "retraction_blast_radius", "arguments": {"paper": "W1", "limit": limit}}})
+            self.assertTrue(r["result"]["isError"])
+            self.assertIn(problem, r["result"]["content"][0]["text"])
 
 
 if __name__ == "__main__":

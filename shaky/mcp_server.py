@@ -139,10 +139,13 @@ def _bad_args(name: str, args: dict) -> str | None:
     schema = next(tool for tool in TOOLS if tool["name"] == name)["inputSchema"]
     missing = [k for k in schema["required"] if k not in args]
     unknown = [k for k in args if k not in schema["properties"]]
-    wrong = [k for k, v in args.items() if k in schema["properties"]
-             and not isinstance(v, {"string": str, "boolean": bool, "integer": int}[schema["properties"][k]["type"]])]
-    if missing or unknown or wrong:
-        return f"bad arguments: missing {missing}, unknown {unknown}, wrong type {wrong}"
+    props = {k: schema["properties"][k] for k in args if k in schema["properties"]}
+    wrong = [k for k, spec in props.items() if isinstance(args[k], bool) != (spec["type"] == "boolean")
+             or not isinstance(args[k], {"string": str, "boolean": bool, "integer": int}[spec["type"]])]
+    outside = [k for k, spec in props.items() if k not in wrong
+               and not spec.get("minimum", args[k]) <= args[k] <= spec.get("maximum", args[k])]
+    if missing or unknown or wrong or outside:
+        return f"bad arguments: missing {missing}, unknown {unknown}, wrong type {wrong}, out of range {outside}"
     return None
 
 

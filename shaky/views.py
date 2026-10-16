@@ -311,7 +311,8 @@ def check_list(g: Graph, text: str, credits: int = 200) -> dict:
 def run_check(g: Graph, text: str, credits: int = 50) -> dict:
     """A new foundation check (writes: loads references, judges citations). Needs ALLOW_RUNS."""
     if not config.ALLOW_RUNS:
-        raise NotAllowed("this server is read only (ALLOW_RUNS=0): run checks locally with python -m shaky.foundation")
+        raise NotAllowed("this server is read only, so it shows only checks that were already run; to run a new "
+                         "one, run Shaky Ground yourself: python -m shaky.foundation <doi>")
     resolve.lookup_key(text)        # refuse bad input before taking the lock
     with _writes:
         return foundation.check(g, text, max_credits=credits)
