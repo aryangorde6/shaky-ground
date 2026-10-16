@@ -42,6 +42,28 @@ Also cited: https://doi.org/10.1016/j.expneurol.2016.06.006. Again: 10.1016/J.NE
                                 "10.1016/j.expneurol.2016.06.006"])
         self.assertEqual(without, 1)     # entry c; the DOI after it belongs to no entry
 
+    def test_plain_list_counts_references_without_doi(self):
+        numbered = """References
+[1] Walsh DM et al. Naturally secreted oligomers of amyloid beta protein potently inhibit
+    hippocampal long-term potentiation in vivo. Nature 2002. https://doi.org/10.1038/416535a
+[2] Smith J. A conference talk with no DOI. 2019.
+[3] Shankar GM et al. Amyloid-beta protein dimers. Nat Med 2008. doi:10.1038/nm1782"""
+        self.assertEqual(foundation.dois_in(numbered), (["10.1038/416535a", "10.1038/nm1782"], 1))
+        per_line = "doi:10.1038/416535a\nSmith J. A talk with no DOI. 2019.\n10.1038/nm1782\nJones K. A book. 2001."
+        self.assertEqual(foundation.dois_in(per_line)[1], 2)
+        blocks = "Walsh DM et al. Naturally secreted oligomers.\nNature 2002. 10.1038/416535a\n\nSmith J. No DOI.\n2019."
+        self.assertEqual(foundation.dois_in(blocks)[1], 1)
+        self.assertEqual(foundation.dois_in("10.1000/one 10.1000/two")[1], 0)   # one line of DOIs
+
+    def test_plain_list_never_clean_with_unchecked_references(self):
+        clean = {"paper": {"id": "W1", "title": "One", "year": 2001}, "verdict": f"CLEAN · DEPTH {foundation.DEPTH}",
+                 "paper_retracted": False, "investigation": "aa", "retracted_ancestors": []}
+        r = foundation.check_list(None, "1. One. 10.1000/one\n2. A reference with no DOI.", stored=lambda doi: clean, run=False)
+        self.assertEqual((r["references"], r["without_doi"]), (2, 1))
+        self.assertEqual(r["verdict"], "NO RETRACTED WORK FOUND")
+        r = foundation.check_list(None, "1. One. 10.1000/one", stored=lambda doi: clean, run=False)
+        self.assertEqual(r["verdict"], f"CLEAN · DEPTH {foundation.DEPTH}")
+
     def test_nothing_to_check_is_refused(self):
         with self.assertRaises(resolve.ResolveError):
             foundation.check_list(None, "just some words, no references")

@@ -380,7 +380,9 @@ function howToRead() {
 }
 
 function blastHelp() {
-  return [h("h3", {}, "Try"), h("p", { class: "note" }, `${state.config.demo_root} (Lesné et al. 2006, Nature, retracted 2024), or any paper that is loaded in the graph.`)];
+  return [h("h3", {}, "Try"), h("p", { class: "note" }, state.config.allow_runs
+    ? `${state.config.demo_root} (Lesné et al. 2006, Nature, retracted 2024), or any paper that is loaded in the graph.`
+    : `${state.config.demo_root} (Lesné et al. 2006, Nature, retracted 2024). This server is read only, so it traces that one paper; click any paper in its graph to see its chain and the sentences behind it.`)];
 }
 
 function focusTier(key, btn) {

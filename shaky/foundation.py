@@ -182,13 +182,37 @@ BIB_ENTRY = re.compile(r"^\s*@\s*(?!comment|string|preamble)\w+\s*\{", re.IGNORE
 
 def dois_in(text: str) -> tuple[list[str], int]:
     """The DOIs in a pasted reference list or BibTeX file, in order and without repeats, and how many
-    BibTeX entries carry none (those can't be looked up, so they are reported as not checked)."""
+    entries carry none (those can't be looked up, so they are reported as not checked). Entries are
+    BibTeX entries when there are any, else the items of a plain list (see _text_entries)."""
     found = []
     for m in resolve.DOI.finditer(text):
         doi = m.group(1).rstrip(".,;)]}\"'").lower()
         if doi not in found:
             found.append(doi)
-    return found, sum(1 for e in _bib_entries(text) if not resolve.DOI.search(e))
+    entries = _bib_entries(text) or _text_entries(text)
+    return found, sum(1 for e in entries if not resolve.DOI.search(e))
+
+
+LIST_MARK = re.compile(r"^\s*(?:\[\d{1,4}\]|\(\d{1,4}\)|\d{1,4}[.)])\s")
+LIST_HEADING = re.compile(r"^\s*(?:references|bibliography|works cited|literature cited)\s*:?\s*$", re.IGNORECASE)
+
+
+def _text_entries(text: str) -> list[str]:
+    """The references in a plain pasted list: its numbered items ([1], (1), 1. or 1)) when it is numbered,
+    else its blocks when blank lines separate them, else one per line. A heading line is not a reference.
+    When unsure, this splits too finely rather than too coarsely: an extra entry without a DOI only stops
+    the list from being called CLEAN, while a missed one would let it be."""
+    lines = [l for l in text.splitlines() if l.strip() and not LIST_HEADING.match(l)]
+    if sum(1 for l in lines if LIST_MARK.match(l)) >= 2:
+        items = []
+        for l in lines:
+            if LIST_MARK.match(l) or not items:
+                items.append(l)
+            else:
+                items[-1] += " " + l.strip()
+        return items
+    blocks = [b for b in re.split(r"\n\s*\n", text) if b.strip() and not LIST_HEADING.match(b)]
+    return blocks if len(blocks) > 1 else lines
 
 
 def _bib_entries(text: str) -> list[str]:

@@ -199,7 +199,7 @@ Every pick and its reason is stored as `(:Investigation)-[:EXPLORED {round, reas
    - `NO RETRACTED WORK FOUND`: with what could not be checked;
    - `CLEAN · DEPTH 2`: only when every reference to depth 2 was checked;
    - `NO DATA`.
-4. With `--list` (or the reference-list box in the web UI), it checks every DOI in a BibTeX file or a pasted reference list within one credit budget. The list gets its worst entry's verdict, and a list that cites a retracted paper directly is at least `CITES RETRACTED WORK`. Entries without a DOI are counted as not checked. The web UI reuses each reference's stored check; read only, a reference never checked there is `NOT CHECKED`, never cleared.
+4. With `--list` (or the reference-list box in the web UI), it checks every DOI in a BibTeX file or a pasted reference list within one credit budget. The list gets its worst entry's verdict, and a list that cites a retracted paper directly is at least `CITES RETRACTED WORK`. Entries without a DOI are counted as not checked (in a plain list, each numbered item is an entry, or else each blank-line-separated block, or else each line), so such a list is never `CLEAN`. The web UI reuses each reference's stored check; read only, a reference never checked there is `NOT CHECKED`, never cleared.
 
 ## The web UI
 

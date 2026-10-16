@@ -89,6 +89,9 @@ def find(g: Graph, text: str) -> str:
     rows = (_rows(g, "MATCH (p:Paper {doi: $k}) RETURN p.id", k=key[4:]) if kind == "doi"
             else _rows(g, "MATCH (p:Paper {id: $k}) RETURN p.id", k=key))
     if not rows:
+        if not config.ALLOW_RUNS:
+            raise NotFound(f"{key.removeprefix('doi:')} is not in this server's graph, and the server is read only; "
+                           f"to load it, run Shaky Ground yourself: python -m shaky.load {key}")
         raise NotFound(f"{key.removeprefix('doi:')} is not in the graph yet (load it with: python -m shaky.load {key})")
     return rows[0][0]
 
@@ -107,7 +110,8 @@ def ensure_root(g: Graph, root_id: str) -> None:
     if current[0][0] == root_id:
         return
     if not config.ALLOW_RUNS:
-        raise NotAllowed(f"risk is computed for another paper on this server; it is read only (ALLOW_RUNS=0)")
+        raise NotAllowed(f"this server is read only, so it traces one retracted paper, {config.DEMO_ROOT}; to trace "
+                         f"another, run Shaky Ground yourself (see the README). Papers in its graph open with a click.")
     with _writes:
         risk.propagate(g, root_id)
 
