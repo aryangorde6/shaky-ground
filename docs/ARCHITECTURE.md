@@ -43,6 +43,7 @@ Every entry point is a module run with `python -m` (through `uv run`). Each modu
 | `python -m shaky.snapshot export\|restore PATH` | `snapshot.py` | `export` / `restore` | restore writes the whole graph |
 | `python -m shaky.preflight` | `preflight.py` | `main` | no |
 | `python -m shaky.bench W…` | `bench.py` | `median_ms` over 5 queries | yes: it runs `propagate` 20 times (same result each time) |
+| `python -m shaky.humancheck sample\|score` | `humancheck.py` | `sample` / `score` | no: `sample` reads the judged links, `score` reads two JSON files |
 | `python -m shaky.resolve <text>` / `shaky.retractionwatch` | `resolve.py` / `retractionwatch.py` | `resolve` / `retractions_by_doi` | no (debug helpers) |
 | `python examples/cite_check_agent.py` | `cite_check_agent.py` | `main` | no (starts the MCP server as a child process) |
 | `python -m unittest` | `tests/test_rules.py` | the offline tests of the rules | no database needed |

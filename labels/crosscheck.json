@@ -1,0 +1,152 @@
+{
+ "L01": {
+  "choice": "critical",
+  "sentence": null,
+  "note": "mentions the allegations of falsified images"
+ },
+ "L02": {
+  "choice": "uses",
+  "sentence": 0,
+  "note": "four-step extraction procedure and immunoblot from it"
+ },
+ "L03": {
+  "choice": "none",
+  "sentence": null,
+  "note": "one of 4 references for a general statement"
+ },
+ "L04": {
+  "choice": "none",
+  "sentence": null,
+  "note": "one entry in a list of oligomer types"
+ },
+ "L05": {
+  "choice": "uses",
+  "sentence": null,
+  "note": "fractions extracted as previously described [15]"
+ },
+ "L06": {
+  "choice": "none",
+  "sentence": null,
+  "note": "general statement with 2 references; second sentence is a fragment"
+ },
+ "L07": {
+  "choice": "relies",
+  "sentence": 1,
+  "note": "studies Abeta*56 in Tg2576 because the paper described it there; borderline uses"
+ },
+ "L08": {
+  "choice": "none",
+  "sentence": null,
+  "note": "one of 4 references for a general statement"
+ },
+ "L09": {
+  "choice": "relies",
+  "sentence": 0,
+  "note": "review cites the single finding EE reduces AbetaOs; model class seen earlier on the live site"
+ },
+ "L10": {
+  "choice": "none",
+  "sentence": null,
+  "note": "reported EEG finding as context; borderline relies"
+ },
+ "L11": {
+  "choice": "uses",
+  "sentence": null,
+  "note": "lysis buffer adapted from it; model class known from the README"
+ },
+ "L12": {
+  "choice": "none",
+  "sentence": null,
+  "note": "one of 3 references for a general statement"
+ },
+ "L13": {
+  "choice": "uses",
+  "sentence": null,
+  "note": "extracellular-enriched proteins recovered as in it"
+ },
+ "L14": {
+  "choice": "relies",
+  "sentence": 0,
+  "note": "single-reference finding in an argument ('also more potent'); borderline none"
+ },
+ "L15": {
+  "choice": "relies",
+  "sentence": 0,
+  "note": "reasons from its finding ('because ... does not disrupt cognition')"
+ },
+ "L16": {
+  "choice": "relies",
+  "sentence": 2,
+  "note": "conclusion drawn together with its results"
+ },
+ "L17": {
+  "choice": "none",
+  "sentence": null,
+  "note": "describes what it proposed; lists elsewhere"
+ },
+ "L18": {
+  "choice": "critical",
+  "sentence": null,
+  "note": "retracted articles / the well-known incident"
+ },
+ "L19": {
+  "choice": "none",
+  "sentence": null,
+  "note": "lists of references for general statements"
+ },
+ "L20": {
+  "choice": "unclear",
+  "sentence": null,
+  "note": "cannot tell which reference is which: contradicting results or artifacts"
+ },
+ "L21": {
+  "choice": "uses",
+  "sentence": null,
+  "note": "membrane fractions isolated as described in it"
+ },
+ "L22": {
+  "choice": "unclear",
+  "sentence": null,
+  "note": "strain list, nothing about the cited paper"
+ },
+ "L23": {
+  "choice": "uses",
+  "sentence": null,
+  "note": "adapted its electrode and analysis techniques"
+ },
+ "L24": {
+  "choice": "unclear",
+  "sentence": null,
+  "note": "cut-off fragment"
+ },
+ "L25": {
+  "choice": "critical",
+  "sentence": null,
+  "note": "its protocol did not give reproducible results"
+ },
+ "L26": {
+  "choice": "uses",
+  "sentence": null,
+  "note": "extraction as described in it"
+ },
+ "L27": {
+  "choice": "relies",
+  "sentence": 0,
+  "note": "review on EE cites its single specific finding"
+ },
+ "L28": {
+  "choice": "relies",
+  "sentence": 1,
+  "note": "one of two oligomers shown to impair when injected; sentence cites 5 papers, so the list rule applies"
+ },
+ "L29": {
+  "choice": "unclear",
+  "sentence": null,
+  "note": "fragment '[3-6]].'"
+ },
+ "L30": {
+  "choice": "relies",
+  "sentence": 0,
+  "note": "studied Abeta*56 because the paper said it causes the memory deficit"
+ }
+}

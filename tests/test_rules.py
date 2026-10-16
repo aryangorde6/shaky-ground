@@ -5,7 +5,7 @@
 import unittest
 from unittest import mock
 
-from shaky import carry, config, foundation, judge, mcp_server, resolve, risk, views
+from shaky import carry, config, foundation, humancheck, judge, mcp_server, resolve, risk, views
 from shaky.reliance import WEIGHTS
 
 
@@ -131,6 +131,22 @@ class Carry(unittest.TestCase):
         self.assertEqual(list(out), [0])
         self.assertIs(out[0]["carries"], True)
         self.assertEqual(out[0]["took"], {"B1": "a buffer"})
+
+
+class CrossCheck(unittest.TestCase):
+    """A second labeller's answers go through the judge's own rules before they are compared."""
+
+    def test_same_rules_as_the_judge(self):
+        item = {"key": "L01", "sentences": ["X impairs memory (Smith et al., 2006).",
+                                            "X impairs memory (Smith et al., 2006; Lee, 2007; Kim, 2008)."],
+                "model": {"cls": "SUPPORTING"}, "citing": {"id": "W1"}, "cited": {"id": "W2"}}
+        self.assertEqual(humancheck.labelled_class(item, {"choice": "relies", "sentence": 0}), "SUPPORTING")
+        self.assertEqual(humancheck.labelled_class(item, {"choice": "relies", "sentence": 1}), "BACKGROUND")
+        self.assertEqual(humancheck.labelled_class(item, {"choice": "none"}), "BACKGROUND")
+        s = humancheck.score([item], {"L01": {"choice": "uses"}})
+        self.assertEqual((s["same_class"], s["strong_confirmed"], s["per_class"]["SUPPORTING"]), (0, [1, 1], [0, 1]))
+        with self.assertRaises(ValueError):
+            humancheck.score([item], {})
 
 
 class McpProtocol(unittest.TestCase):

@@ -78,9 +78,10 @@ uv run python -m shaky.report 10.1038/nature04533 --out data/reports/lesne.md
 uv run python -m shaky.foundation 10.1016/j.neuroscience.2007.10.054
 uv run python -m shaky.foundation --list references.bib --credits 200   # every DOI in a reference list
 
-# 10. Median latency of the main queries, and the offline tests of the rules
+# 10. Median latency of the main queries, the offline tests of the rules, and the judge's cross-check
 uv run python -m shaky.bench W2075481535
 uv run python -m unittest -v
+uv run python -m shaky.humancheck score labels/sample.json labels/crosscheck.json
 
 # 11. The web UI (http://127.0.0.1:8000), and the MCP server for AI agents (stdio)
 uv run python -m shaky.web
@@ -262,6 +263,7 @@ One run, on four real sources for "soluble amyloid-β oligomers, more than plaqu
 - **OpenAlex reference lists include works it has since deleted.** For example, 23 of the 79 references of *Deep Residual Learning* return 404. Those can't be checked, so that paper gets `NO RETRACTED WORK FOUND`, not `CLEAN`.
 - **"Retracted" means flagged by OpenAlex or matched by DOI to a Retraction Watch notice.** A reference without a DOI relies on the OpenAlex flag alone.
 - **Models make mistakes.** Every judgment stores the sentence it rests on and the model that made it, so a person can check it. Judged links are never sent again. Bumping a prompt's `VERSION` re-judges.
+- **Cross-checked by a third model, not yet by a person.** A model from a different family than either judge labelled 30 judged links from the same sentences without seeing their classes (8 FOUNDATIONAL, 7 SUPPORTING, 4 CRITICAL, 3 UNKNOWN and 8 BACKGROUND, drawn with a fixed seed so the rare strong classes are covered). Its answers went through the same rules. It gave the same class on 27 of 30 links. Of the 15 the judges called strong, it called 14 strong too; of the other 15, it called none strong. None of the 3 differences changes the 45 papers that build on Lesné. One is among the 11 disputes: the sentence questions several references and the labeller couldn't tell which. It had seen the classes of 2 of the 30 before; without them, 25 of 28 agree. The sample and both sets of labels are in `labels/`: `python -m shaky.humancheck score labels/sample.json labels/crosscheck.json`. Agreement between models is not agreement with a person; a human-labelled sample is still to do.
 - **Building on a retracted paper doesn't make a paper wrong.** Using its buffer recipe is not the same as relying on its manipulated images. The report says *depends on*, never *is wrong*. Next step: compare what was taken with what the retraction notice is about.
 - **Risk is stored for one retracted paper at a time** (`risk_root`). A carry judgment is stored for one root per link.
 - **Depth:** 3 citations downstream, 2 upstream, both to stay within the free API budgets.

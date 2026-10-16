@@ -1,0 +1,855 @@
+[
+ {
+  "key": "L01",
+  "citing": {
+   "id": "W4385188245",
+   "title": "Anti-amyloid: An antibody to cure Alzheimer’s or an attitude",
+   "year": 2023
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "Shockwaves were sent through the AD field after allegations that falsified images of Ab56 oligomers were used in seminal manuscripts from 2006.(6) The group claimed to have discovered a new oligomer, ‘‘amyloid beta star 56’’ (Ab56) that was isolated from a transgenic mouse model and injected into rats, which subsequently developedmemory deficits – a hallmark of AD pathology."
+  ],
+  "intents": [
+   "methodology"
+  ],
+  "influential": false,
+  "model": {
+   "cls": "CRITICAL",
+   "sentence": 0,
+   "why": "Mentions allegations of falsified images in the cited 2006 manuscript.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 11
+ },
+ {
+  "key": "L02",
+  "citing": {
+   "id": "W2150356698",
+   "title": "Cyclooxygenase-2 inhibition improves amyloid-β-mediated suppression of memory and synaptic plasticity",
+   "year": 2008
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "Ab Ã 56 was measured in membrane-enriched extracts of hemibrains following a four-step extraction procedure, by immunoblotting using the 6E10 monoclonal antibody (Lesné et al., 2006).",
+   "Because Ab 56 appears to impair memory in Tg2576 mice (Lesné et al., 2006), we asked whether NSAIDs altered its concentration in the brain.",
+   "These observations suggest that APP transgenic mice represent a prodromal or latent stage of Alzheimer's disease rather than the actual disease itself (Zandi and Breitner, 2001; Ashe, 2005; Lesné et al., 2006).",
+   "These observations suggest that APP transgenic mice represent a prodromal or latent stage of Alzheimer’s disease rather than the actual disease itself (Zandi and Breitner, 2001; Ashe, 2005; Lesné et al., 2006)."
+  ],
+  "intents": [],
+  "influential": true,
+  "model": {
+   "cls": "FOUNDATIONAL",
+   "sentence": 0,
+   "why": "Measured Abeta*56 using the immunoblotting extraction procedure from the cited paper.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 37
+ },
+ {
+  "key": "L03",
+  "citing": {
+   "id": "W2089301493",
+   "title": "Effects of soluble β-amyloid on the release of neurotransmitters from rat brain synaptosomes",
+   "year": 2014
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "…evidences have shown that betaamyloid (Aβ), which plays a crucial role both in the early and late phases of AD, disrupts cholinergic neurotransmission by interacting with presynaptic cholinergic receptors function (Cleary et al., 2005; Lesné et al., 2006; Mura et al., 2010a; Govoni et al., 2014)."
+  ],
+  "intents": [
+   "background"
+  ],
+  "influential": false,
+  "model": {
+   "cls": "BACKGROUND",
+   "sentence": 0,
+   "why": "Cited in a list for Abeta disrupting cholinergic neurotransmission.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 864
+ },
+ {
+  "key": "L04",
+  "citing": {
+   "id": "W4200555036",
+   "title": "Aptamers targeting amyloidogenic proteins and their emerging role in neurodegenerative diseases",
+   "year": 2021
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "Many different types of Aβ oligomers have been reported, including paranuclei (5,6-mers) (19), Aβ*56 (56 kDa, 12-mer) (27), protofibrils (PFs, 24–700-mer) (28–30), globulomers (38/48 kDa, 12-mer) (31), AβO ( 90 kDa, 15–20-mer) (32), Aβ-derived diffusible ligands (ADDLs, 90 kDa, 24-mer) (33), annuli (150–250 kDa, 50-mer) (34), and amylospheroids (ASPD; 158–669 kDa, 100-mer) (35)."
+  ],
+  "intents": [],
+  "influential": false,
+  "model": {
+   "cls": "BACKGROUND",
+   "sentence": 0,
+   "why": "Lists Aβ*56 (56 kDa, 12-mer) as an identified oligomer type.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 864
+ },
+ {
+  "key": "L05",
+  "citing": {
+   "id": "W2128708169",
+   "title": "Longitudinal testing of hippocampal plasticity reveals the onset and maintenance of endogenous human Aß-induced synaptic dysfunction in individual freely behaving pre-plaque transgenic rats: rapid reversal by anti-Aß agents",
+   "year": 2014
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "Proteins from frontal cortex were extracted to yield fractions enriched in extracellular, intracellular, membraneassociated, and insoluble proteins as previously described [15]."
+  ],
+  "intents": [
+   "methodology"
+  ],
+  "influential": false,
+  "model": {
+   "cls": "FOUNDATIONAL",
+   "sentence": 0,
+   "why": "Uses extraction protocol to yield extracellular and other protein fractions.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 37
+ },
+ {
+  "key": "L06",
+  "citing": {
+   "id": "W2146793115",
+   "title": "Efficient Near-Infrared In Vivo Imaging of Amyoid-β Deposits in Alzheimer's Disease Mouse Models",
+   "year": 2012
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "Growing evidence indicates that A oligomers may be even more critical than amyloid plaques for the development of AD-related neuronal dysfunction and memory deficits [8, 12], although there is also evidence for a direct pathogenic role of plaques and plaque-associated neuritic dystrophy [9, 13, 14].",
+   "[8, 9]."
+  ],
+  "intents": [],
+  "influential": false,
+  "model": {
+   "cls": "BACKGROUND",
+   "sentence": 0,
+   "why": "Cited in a list supporting oligomer importance over plaques.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 864
+ },
+ {
+  "key": "L07",
+  "citing": {
+   "id": "W1597149208",
+   "title": "Quaternary Structure Defines a Large Class of Amyloid-β Oligomers Neutralized by Sequestration",
+   "year": 2015
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "The types of Aβo (e.g., Aβ dimers and Aβ*56, a putative dodecamer) and fibrils in mice vary dynamically, over a time scale of weeks to months (for examples in Tg2576, Arc6 and hAPP-J20 mice, see (Cheng et al., 2007; Lesne et al., 2006; Shankar et al., 2009)).",
+   "We used Tg2576 mice, in which Ab*56 was originally described (Lesné et al., 2006), to compare the spatial distribution of Ab*56 to that of type 2 Abo.",
+   "…associated with impaired cognition: the Type 1 Aβo Aβ*56 is associated with memory dysfunction in APP transgenic mice (Billings et al., 2007; Cheng et al., 2007; Lesne et al., 2006; Lesne et al., 2008), while mice with levels of Type 2\nCell Rep. Author manuscript; available in PMC 2016 June 23.",
+   "The Type 1 AbOligomer Ab*56 Is Distributed throughout the Cortex The A11-immunoreactive oligomer Ab*56 appears months before the emergence of the first detectable dense-core plaques in Tg2576 (Kawarabayashi et al., 2001; Lesné et al., 2006) and hAPP-J20 (Cheng et al."
+  ],
+  "intents": [],
+  "influential": true,
+  "model": {
+   "cls": "FOUNDATIONAL",
+   "sentence": 1,
+   "why": "Uses Tg2576 mice based on the model where Ab*56 was described.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 37
+ },
+ {
+  "key": "L08",
+  "citing": {
+   "id": "W2793307595",
+   "title": "Role of Copper in the Onset of Alzheimer’s Disease Compared to Other Metals",
+   "year": 2018
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "…oligomers derived from cell culture have unusually high chemical stability and resist degradation into monomers by various degrading agents, supporting the existence of covalent cross-links between the oligomers (Podlisny et al., 1995; Walsh et al., 2002; Lesné et al., 2006; Naylor et al., 2008)."
+  ],
+  "intents": [
+   "background"
+  ],
+  "influential": false,
+  "model": {
+   "cls": "BACKGROUND",
+   "sentence": 0,
+   "why": "Cited in a list regarding the chemical stability of oligomers.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 864
+ },
+ {
+  "key": "L09",
+  "citing": {
+   "id": "W2055775253",
+   "title": "Amyloid β oligomers in Alzheimer’s disease pathogenesis, treatment, and diagnosis",
+   "year": 2015
+  },
+  "cited": {
+   "id": "W2044827730",
+   "title": "Environmental enrichment strengthens corticocortical interactions and reduces amyloid-β oligomers in aged mice",
+   "year": 2014,
+   "venue": "Frontiers in Aging Neuroscience"
+  },
+  "sentences": [
+   "At an additional level, it has been found that enriched environments increase synthesis of the Aβ-degrading enzyme neprilysin and decreases the abundance of brain AβOs, accompanied by an upward shift of the cortical excitation/inhibition balance [114]."
+  ],
+  "intents": [
+   "background"
+  ],
+  "influential": false,
+  "model": {
+   "cls": "SUPPORTING",
+   "sentence": 0,
+   "why": "cites specific finding on neprilysin and AβOs",
+   "judged_by": "groq:openai/gpt-oss-120b:v3"
+  },
+  "population": 31
+ },
+ {
+  "key": "L10",
+  "citing": {
+   "id": "W2883956969",
+   "title": "Soluble Aβ Oligomers Impair Dipolar Heterodendritic Plasticity by Activation of mGluR in the Hippocampal CA1 Region",
+   "year": 2018
+  },
+  "cited": {
+   "id": "W2044827730",
+   "title": "Environmental enrichment strengthens corticocortical interactions and reduces amyloid-β oligomers in aged mice",
+   "year": 2014,
+   "venue": "Frontiers in Aging Neuroscience"
+  },
+  "sentences": [
+   "It has been reported that EE counteracts the age-dependent shift of EEG spectral power toward slow oscillations (d and q rhythms) (Mainardi et al., 2014)."
+  ],
+  "intents": [
+   "background"
+  ],
+  "influential": false,
+  "model": {
+   "cls": "SUPPORTING",
+   "sentence": 0,
+   "why": "EE counteracts EEG spectral shift",
+   "judged_by": "groq:openai/gpt-oss-120b:v3"
+  },
+  "population": 31
+ },
+ {
+  "key": "L11",
+  "citing": {
+   "id": "W2044827730",
+   "title": "Environmental enrichment strengthens corticocortical interactions and reduces amyloid-β oligomers in aged mice",
+   "year": 2014
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "…dissected out, frozen in dry ice and stored at −80◦C. Samples were homogenated and soluble proteins were extracted with a lysis buffer adapted from Lesne et al. (2006), that contained 0.01% NP-40, 0.1% SDS, 50 mM TrisHCl, pH 7.6, 150 mM NaCl, 2 mM EDTA, 0.1 mM Na3VO4, 1 μg/ml leupeptin, 1 μg/ml…",
+   "Since Aβ aggregates are observed across a wide range of molecular weights, with specific immunoreactivity profiles to antibodies commonly used in western blotting (Lesne et al., 2006), we performed Western blot analyses using two different antibodies, namely A11 and 4G8 (Table 1).",
+   "A key histopathological sign of AD is the accumulation in the brain parenchyma of Aβ oligomers, which are found in a wide range of molecular weights, ranging from 4 kDa (monomers) to about 65 kDa (Lesne et al., 2006).",
+   "These antibodies were selected because of their reactivity against mouse endogenous Aβ and basing on existing literature (Lesne et al., 2006)."
+  ],
+  "intents": [
+   "background",
+   "methodology"
+  ],
+  "influential": true,
+  "model": {
+   "cls": "FOUNDATIONAL",
+   "sentence": 0,
+   "why": "Extracted soluble proteins using a lysis buffer adapted from the cited paper.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 37
+ },
+ {
+  "key": "L12",
+  "citing": {
+   "id": "W2103462444",
+   "title": "Genome-wide analysis ofSaccharomyces cerevisiaeidentifies cellular processes affecting intracellular aggregation of Alzheimer's amyloid-β42: importance of lipid homeostasis",
+   "year": 2014
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "However, soluble oligomeric forms of Aβ, rather than monomeric or fibrillar forms, are the most neurotoxic species (Gouras et al., 2005; Lesne and Kotilinek, 2005; Lesne et al., 2006), and an increase of soluble oligomeric forms of Aβ42 may be an early event in AD progression (Gouras et al.",
+   "However, soluble oligomeric forms of Aβ, rather than monomeric or fibrillar forms, are the most neurotoxic species (Gouras et al., 2005; Lesne and Kotilinek, 2005; Lesne et al., 2006), and an increase of soluble oligomeric forms of Aβ42 may be an early event in AD progression (Gouras et al., 2005)."
+  ],
+  "intents": [],
+  "influential": false,
+  "model": {
+   "cls": "BACKGROUND",
+   "sentence": 0,
+   "why": "Cited alongside others for soluble oligomeric Aβ being most neurotoxic.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 864
+ },
+ {
+  "key": "L13",
+  "citing": {
+   "id": "W2284171698",
+   "title": "Improved proteostasis in the secretory pathway rescues Alzheimer’s disease in the mouse",
+   "year": 2016
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "Indicated bands correspond to already characterized amyloid-b oligomers (Lesne et al., 2006; Pehar et al., 2010).",
+   "At 12 months of age, APP695/swe mice display high molecular mass amyloid-b species (oligomers); they originate from the aggregation of the monomeric peptide and are\nhighly toxic (Cleary et al., 2005; Lesne et al., 2006;\nPehar et al., 2010).",
+   "Indicated bands correspond to already characterized amyloid-b oligomers (Lesne et al., 2006; Pehar et al., 2010). soluble APP (sAPP) is also indicated.",
+   "Protein extraction and western blotting\nProtein extracts (Peng et al., 2014) and extracellular enriched proteins (Lesne et al., 2006; Pehar et al., 2010) were recovered as before."
+  ],
+  "intents": [
+   "background"
+  ],
+  "influential": true,
+  "model": {
+   "cls": "FOUNDATIONAL",
+   "sentence": 3,
+   "why": "Extracts extracellular enriched proteins using protocol from cited paper.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 37
+ },
+ {
+  "key": "L14",
+  "citing": {
+   "id": "W2057303091",
+   "title": "Di-Tyrosine Cross-Link Decreases the Collisional Cross-Section of Aβ Peptide Dimers and Trimers in the Gas Phase: An Ion Mobility Study",
+   "year": 2014
+  },
+  "cited": {
+   "id": "W2021740213",
+   "title": "RETRACTED: Cognitive effects of cell-derived and synthetically derived Aβ oligomers",
+   "year": 2010,
+   "venue": "Neurobiology of Aging"
+  },
+  "sentences": [
+   "When measured by their cognitive effects, cellderived oligomers were also more potent [16]."
+  ],
+  "intents": [
+   "background"
+  ],
+  "influential": false,
+  "model": {
+   "cls": "SUPPORTING",
+   "sentence": 0,
+   "why": "states cell-derived more potent",
+   "judged_by": "groq:openai/gpt-oss-120b:v3"
+  },
+  "population": 31
+ },
+ {
+  "key": "L15",
+  "citing": {
+   "id": "W2065413916",
+   "title": "Tau Immunotherapy Modulates Both Pathological Tau and Upstream Amyloid Pathology in an Alzheimer's Disease Mouse Model",
+   "year": 2015
+  },
+  "cited": {
+   "id": "W2021740213",
+   "title": "RETRACTED: Cognitive effects of cell-derived and synthetically derived Aβ oligomers",
+   "year": 2010,
+   "venue": "Neurobiology of Aging"
+  },
+  "sentences": [
+   "Importantly, this increase was surmised to not cause impairment in mice, because administration of trimers in rats does not disrupt cognition (Reed et al., 2011)."
+  ],
+  "intents": [
+   "background"
+  ],
+  "influential": false,
+  "model": {
+   "cls": "SUPPORTING",
+   "sentence": 0,
+   "why": "cites Reed on trimers not impairing cognition",
+   "judged_by": "groq:openai/gpt-oss-120b:v3"
+  },
+  "population": 31
+ },
+ {
+  "key": "L16",
+  "citing": {
+   "id": "W2131792847",
+   "title": "Plaque-bearing mice with reduced levels of oligomeric amyloid-β assemblies have intact memory function",
+   "year": 2007
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "The data support previous studies showing the importance of Aβ*56 in memory dysfunction (Lesne et al., 2006), and also suggest that amyloid plaque formation early in AD may help to absorb the impact of Aβ*56 and other Aβ oligomers on brain function.",
+   "Although we cannot exclude the alternative possibilities that soluble Aβ assemblies are cleared or degraded during this specific time interval, several reasons make this unlikely: i) the transient reduction in Aβ oligomers is extremely brief (only a few weeks); and ii) Aβ*56 is resistant to harsh conditions ex vivo (i.e. 4% SDS, 10% HFIP) (Lesne et al., 2006).",
+   "Taken together with previous results showing impaired memory in mice lacking amyloid plaques but producing Aβ*56 (Lesne et al., 2006), we conclude that in the early stages of amyloid deposition there is no association between plaques and memory loss, in contrast to a strong association between…",
+   "Tg2576 mice lack neurodegeneration (Irizarry et al., 1997), and may therefore be a model of early or pre-clinical AD (Ashe, 2001, Lesne et al., 2006)."
+  ],
+  "intents": [
+   "background",
+   "result",
+   "methodology"
+  ],
+  "influential": true,
+  "model": {
+   "cls": "SUPPORTING",
+   "sentence": 0,
+   "why": "Directly builds on cited paper's Abeta*56 findings to interpret own data.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 31
+ },
+ {
+  "key": "L17",
+  "citing": {
+   "id": "W3178611625",
+   "title": "Refining the amyloid β peptide and oligomer fingerprint ambiguities in Alzheimer’s disease: Mass spectrometric molecular characterization in brain, cerebrospinal fluid, blood, and plasma",
+   "year": 2021
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "Likewise, optimistically one might envision the development of specific A β oligomer, proto-fibril, and fibril antibodies (Kayed et al., 2003, 2007, 2010; Kayed & Glabe, 2006; Lesné et al., 2006).",
+   "Lesné et al. proposed the existence of a soluble ~ 56 kDa A β species after analyzing transgenic mouse brains using SEC and WB (Lesné et al., 2006).",
+   "Indeed, long sought-out conformational antibodies targeting generic epitopes present in either prefibrillar oligomers or fibrils have been reported (Kayed et al., 2003, 2007, 2010; Kayed & Glabe, 2006; Lesné et al., 2006), and these hold great promise.",
+   "…and physical properties of various oligomers ( e.g ., Asp vs . isoAsp, retention time differences, or collision cross section), if changes in monomeric A β are sufficiently significant (Bleiholder et al., 2011; Dammers et al., 2017; Gremer et al., 2017; Kayed & Glabe, 2006; Yang et al., 2011)."
+  ],
+  "intents": [
+   "methodology",
+   "background"
+  ],
+  "influential": true,
+  "model": {
+   "cls": "BACKGROUND",
+   "sentence": 1,
+   "why": "Background description of Lesne et al.'s proposed 56 kDa species.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 864
+ },
+ {
+  "key": "L18",
+  "citing": {
+   "id": "W4408892909",
+   "title": "Current State of Research on the Mechanisms of Biological Activity of Alginates",
+   "year": 2025
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "This prompts us to analyze the provided data more carefully, especially given the fact that some of these articles had been retracted [128] or used not entirely relevant experimental models [159, 160].",
+   "However, it is even more important to consider the relevance of traditional AD model using Aβ introduction into the brain, given the well-known incident in neurobiology that occurred a couple of years ago [159, 160]."
+  ],
+  "intents": [],
+  "influential": false,
+  "model": {
+   "cls": "CRITICAL",
+   "sentence": 1,
+   "why": "Mentions the well-known incident/retraction in neurobiology questioning the model.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 11
+ },
+ {
+  "key": "L19",
+  "citing": {
+   "id": "W487001082",
+   "title": "A rat model of oligomeric forms of beta-amyloid (Aß) peptide: neuronal loss, synaptic alteration, astrogliosis, and calcium-binding proteins activation in vivo",
+   "year": 2011
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "A growing body of evidence supports the notion that soluble oligomeric forms of Aß peptide may be the proximate effectors of neuronal injuries and death in the early stages of AD (Haass and Selkoe, 2007; Lacor et al., 2007; Lesné et al., 2006; Walsh and Selkoe, 2007).",
+   "…been isolated from the brain of AD patients (HGong et al., 2003H), and the levels of soluble Aß are well correlated with synaptic dysfunction (Kokubo et al., 2005; Lacor et al., 2007, Selkoe, 2008; Walsh et al., 2002), and cognitive deficits (Cleary et al 2005; Lesné et al., 2006) in the AD brain."
+  ],
+  "intents": [],
+  "influential": false,
+  "model": {
+   "cls": "BACKGROUND",
+   "sentence": 1,
+   "why": "Cited in a list correlating soluble Aβ with cognitive deficits.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 864
+ },
+ {
+  "key": "L20",
+  "citing": {
+   "id": "W1972242036",
+   "title": "Tau, prions and Aβ: the triad of neurodegeneration",
+   "year": 2010
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "The results contradicting these findings [61, 86, 90] and the recognised experimental artifacts [7] make it more difficult to elucidate their genuine role in disease development."
+  ],
+  "intents": [
+   "result"
+  ],
+  "influential": false,
+  "model": {
+   "cls": "CRITICAL",
+   "sentence": 0,
+   "why": "Citing paper discusses results contradicting findings and recognized experimental artifacts.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 11
+ },
+ {
+  "key": "L21",
+  "citing": {
+   "id": "W1976981142",
+   "title": "Neprilysin Overexpression Inhibits Plaque Formation But Fails to Reduce Pathogenic Aβ Oligomers and Associated Cognitive Deficits in Human Amyloid Precursor Protein Transgenic Mice",
+   "year": 2009
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "NEP overexpression does not reduce pathogenic A oligomers in hAPP mice Why does a 50% reduction of overall A levels fail to improve cognitive function and neuronal Fos expression in hAPP-J20/ NEP mice? To address this question, we measured A *56, a pathogenic A oligomer that correlates closely with learning and memory deficits in different lines of hAPP mice (Lesné et al., 2006; Cheng et al., 2007).",
+   "For detection of the A *56 oligomer, membrane fractions were isolated from a combination of cortex-plus and hippocampal tissues as described previously (Lesné et al., 2006; Cheng et al., 2007).",
+   "Because A -induced neuronal deficits appear to be mediated by A oligomers (Gong et al., 2003; Lacor et al., 2004; Lesné et al., 2006; Townsend et al., 2006; Cheng et al., 2007; Walsh and Selkoe, 2007), we wondered whether increased NEP expression can reduce A oligomer levels in vivo and prevent oligomerrelated cognitive deficits.",
+   "To address this question, we measured A *56, a pathogenic A oligomer that correlates closely with learning and memory deficits in different lines of hAPP mice (Lesné et al., 2006; Cheng et al., 2007)."
+  ],
+  "intents": [
+   "background",
+   "result",
+   "methodology"
+  ],
+  "influential": true,
+  "model": {
+   "cls": "FOUNDATIONAL",
+   "sentence": 1,
+   "why": "Follows the protocol of the cited paper to isolate membrane fractions.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 37
+ },
+ {
+  "key": "L22",
+  "citing": {
+   "id": "W2752394774",
+   "title": "Dianxianning improved amyloid β-induced pathological characteristics partially through DAF-2/DAF-16 insulin like pathway in transgenic C. elegans",
+   "year": 2017
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "38) unc-54(vector) + (pCL26) mtl-2::GFP]; CL4176 smg-1(cc546)I; dvIs27[myo-3p::Aβ(1-42)::let-851 3′UTR) + rol-6(su1006)]X; CL2006, dvIs2 [pCL12 (unc-54/human Aβ peptide1-42 minigene) + pRF4]; CL2179, smg-1[myo-3::GFP]; TJ356 [zIs356 (Pdaf16:: daf-16a/b::GFP + rol-6)]; TJ375[gpIs1(hsp-16."
+  ],
+  "intents": [],
+  "influential": false,
+  "model": {
+   "cls": "UNKNOWN",
+   "sentence": 0,
+   "why": "Context is a strain list with no apparent citation context.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 69
+ },
+ {
+  "key": "L23",
+  "citing": {
+   "id": "W2910803978",
+   "title": "A triheptanoin-supplemented diet rescues hippocampal hyperexcitability and seizure susceptibility in FoxG1 mice",
+   "year": 2019
+  },
+  "cited": {
+   "id": "W2044827730",
+   "title": "Environmental enrichment strengthens corticocortical interactions and reduces amyloid-β oligomers in aged mice",
+   "year": 2014,
+   "venue": "Frontiers in Aging Neuroscience"
+  },
+  "sentences": [
+   "Electrode implants and data analysis were performed at P55 by adapting the techniques described in Mainardi et al. (2014, 2012)."
+  ],
+  "intents": [
+   "methodology"
+  ],
+  "influential": false,
+  "model": {
+   "cls": "FOUNDATIONAL",
+   "sentence": 0,
+   "why": "adapting techniques from Mainardi",
+   "judged_by": "groq:openai/gpt-oss-120b:v3"
+  },
+  "population": 37
+ },
+ {
+  "key": "L24",
+  "citing": {
+   "id": "W2890777607",
+   "title": "Physical Exercise Enhances Neuroplasticity and Delays Alzheimer’s Disease",
+   "year": 2018
+  },
+  "cited": {
+   "id": "W2108919575",
+   "title": "Exercise alters the immune profile in Tg2576 Alzheimer mice toward a response coincident with improved cognitive performance and decreased amyloid",
+   "year": 2008,
+   "venue": "Journal of Neuroinflammation"
+  },
+  "sentences": [
+   "indistinguishable from wild-type mice [213, 214]."
+  ],
+  "intents": [],
+  "influential": false,
+  "model": {
+   "cls": "UNKNOWN",
+   "sentence": 0,
+   "why": "Fragment insufficient to determine how the cited study is used.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 69
+ },
+ {
+  "key": "L25",
+  "citing": {
+   "id": "W2074994510",
+   "title": "Progressive neuropathology and cognitive decline in a single Arctic APP transgenic mouse model",
+   "year": 2009
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "We have ried to analyze A oligomers in brain homogenates from he TgAPParc using the method described in Lesne et al. 2006), but this protocol did not give reproducible results n our hands."
+  ],
+  "intents": [
+   "methodology"
+  ],
+  "influential": false,
+  "model": {
+   "cls": "CRITICAL",
+   "sentence": 0,
+   "why": "Attempted to use protocol from cited paper but failed to reproduce results.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 11
+ },
+ {
+  "key": "L26",
+  "citing": {
+   "id": "W2561585826",
+   "title": "Cathepsin B Improves ß-Amyloidosis and Learning and Memory in Models of Alzheimer’s Disease",
+   "year": 2016
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "For biochemical testing, protein extraction of an extracellularenriched fraction was extracted as described (Lesne et al. 2006)."
+  ],
+  "intents": [
+   "methodology"
+  ],
+  "influential": false,
+  "model": {
+   "cls": "FOUNDATIONAL",
+   "sentence": 0,
+   "why": "Extracellular-enriched protein fraction was extracted as described by cited paper.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 37
+ },
+ {
+  "key": "L27",
+  "citing": {
+   "id": "W1965599652",
+   "title": "Transformation of cortical and hippocampal neural circuit by environmental enrichment",
+   "year": 2014
+  },
+  "cited": {
+   "id": "W2044827730",
+   "title": "Environmental enrichment strengthens corticocortical interactions and reduces amyloid-β oligomers in aged mice",
+   "year": 2014,
+   "venue": "Frontiers in Aging Neuroscience"
+  },
+  "sentences": [
+   "On the other hand, EE strengthens the LFP cross-correlation coupling between the visual cortex and auditory cortex in a frequency and age-dependent manner (Mainardi et al., 2014)."
+  ],
+  "intents": [
+   "background"
+  ],
+  "influential": false,
+  "model": {
+   "cls": "SUPPORTING",
+   "sentence": 0,
+   "why": "cites LFP coupling result",
+   "judged_by": "groq:openai/gpt-oss-120b:v3"
+  },
+  "population": 31
+ },
+ {
+  "key": "L28",
+  "citing": {
+   "id": "W1964308767",
+   "title": "β-Amyloid oligomers in aging and Alzheimer’s disease",
+   "year": 2013
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "Two studies published this year measured levels of specific Aβ oligomers in the brains and CSF of human subjects – both reported that the putative dodecamer Aβ*56 (Lesné et al., 2006) correlated with markers of neuronal dysfunction or injury in cognitively normal subjects.",
+   "…mouse models of AD, only two have been shown to induce neural dysfunction when isolated and injected into the brains of healthy host animals: Aβ*56 (Lesné et al., 2006; Reed et al., 2009) and Aβ dimers (Klyubin et al., 2008; Shankar et al., 2008; Barry et al., 2011; our unpublished observations).",
+   "Additionally, Aβ*56 correlates with memory deficits in three distinct lines of APP transgenic mice (Lesné et al., 2006, Lesné et al., 2008; Billings et al., 2007; Cheng et al., 2007)."
+  ],
+  "intents": [
+   "background"
+  ],
+  "influential": false,
+  "model": {
+   "cls": "BACKGROUND",
+   "sentence": 1,
+   "why": "Reviews evidence regarding A-beta*56 inducing neural dysfunction.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 864
+ },
+ {
+  "key": "L29",
+  "citing": {
+   "id": "W2157100077",
+   "title": "Sinomenine inhibits microglial activation by Aβ and confers neuroprotection",
+   "year": 2011
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "[3-6]]."
+  ],
+  "intents": [],
+  "influential": false,
+  "model": {
+   "cls": "UNKNOWN",
+   "sentence": 0,
+   "why": "Sentence contains only citation numbers with no substantive context.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 69
+ },
+ {
+  "key": "L30",
+  "citing": {
+   "id": "W2147012374",
+   "title": "Ligand-Dependent TrkA Activity in Brain Differentially Affects Spatial Learning and Long-Term Memory",
+   "year": 2011
+  },
+  "cited": {
+   "id": "W2075481535",
+   "title": "RETRACTED ARTICLE: A specific amyloid-β protein assembly in the brain impairs memory",
+   "year": 2006,
+   "venue": "Nature"
+  },
+  "sentences": [
+   "Because Aβ*56 is an oligomeric form purported to be responsible for the memory deficit in APP mice (Lesne et al., 2006), we studied it specifically."
+  ],
+  "intents": [
+   "background"
+  ],
+  "influential": false,
+  "model": {
+   "cls": "SUPPORTING",
+   "sentence": 0,
+   "why": "Relies specifically on Ab*56's purported role in memory deficits to study it.",
+   "judged_by": "gemini:gemini-3.8-flash:v3"
+  },
+  "population": 31
+ }
+]
