@@ -265,9 +265,10 @@ One run, on four real sources for "soluble amyloid-β oligomers, more than plaqu
 
 ## Prior art
 
-- The **Feet of Clay Detector** (Problematic Paper Screener) flags papers whose reference lists include retracted papers.
-- **Zotero** marks retracted papers in your own library.
-- **scite** classifies individual citation statements as supporting, contrasting or mentioning.
+- The **Feet of Clay Detector** (Problematic Paper Screener) flags papers whose reference lists include retracted or otherwise problematic papers.
+- **Zotero** marks retracted papers in your own library (data from Retraction Watch) and warns before you cite one.
+- **scite** classifies individual citation statements as supporting, contrasting or mentioning. Its Reference Check flags the references of a manuscript that are retracted or have editorial notices.
+- **Research:** [a 2025 study of citation networks](https://arxiv.org/abs/2501.00473) finds that retracted papers more prominently affect papers that cite them indirectly. These tools check one step; that harm sits further along the chain.
 
 Shaky Ground adds three things:
 - it follows dependence *through* chains of citations;
@@ -277,6 +278,13 @@ Shaky Ground adds three things:
 ## Data
 
 Data: [Retraction Watch database](https://api.labs.crossref.org/data/retractionwatch) (via Crossref), [OpenAlex](https://openalex.org) and [Semantic Scholar](https://www.semanticscholar.org/product/api).
+
+## Credits
+
+- Data: Retraction Watch database (via Crossref), OpenAlex and Semantic Scholar (see [Data](#data)).
+- Graph drawing: [Cytoscape.js](https://js.cytoscape.org) (MIT). Fonts: Big Shoulders Stencil, Barlow, Barlow Condensed, Source Serif 4 and IBM Plex Mono, via Google Fonts (SIL Open Font License).
+- Demo video narration: a synthetic voice, Chatterbox TTS's built-in voice (not a real person's), Resemble AI, MIT.
+- Demo video music: "Immersed" by Kevin MacLeod (incompetech.com), licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/).
 
 ## Use of AI coding assistants
 
