@@ -300,4 +300,4 @@ Data: [Retraction Watch database](https://api.labs.crossref.org/data/retractionw
 
 ## Use of AI coding assistants
 
-An AI coding assistant was used during development. Details to follow.
+Built with Claude Code as the coding assistant. Every decision in the project is the author's, and the author can explain every part of it.
