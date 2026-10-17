@@ -10,7 +10,7 @@ Graph Hacks: Context for AI Agents (WeMakeDevs × FalkorDB), **Track 01: Agents 
 
 **Demo video (4:08): https://youtu.be/64SxLfHHHHY**. Chapters, credits and what's on screen are in its description.
 
-**Blog post: [How far does a retraction reach?](https://aryangorde.hashnode.dev/how-far-does-a-retraction-reach)**, the design story: why it's a path problem, the Cypher that scores every chain, and what I learned.
+**Blog post: [How far does a retraction reach?](https://aryangorde.hashnode.dev/how-far-does-a-retraction-reach)**, the design story: why it's a path problem, the Cypher that scores every chain, and the lessons from building it.
 
 > Work in progress during the hackathon (Oct 15–18, 2026).
 
