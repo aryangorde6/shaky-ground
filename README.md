@@ -8,6 +8,8 @@ Graph Hacks: Context for AI Agents (WeMakeDevs × FalkorDB), **Track 01: Agents 
 
 **Live demo (read only): https://shaky-ground-production.up.railway.app**, the web UI on Railway, reading a FalkorDB Cloud instance ([how it's deployed](docs/DEPLOY.md)).
 
+**Demo video (4:08): https://youtu.be/64SxLfHHHHY**. Chapters, credits and what's on screen are in its description.
+
 > Work in progress during the hackathon (Oct 15–18, 2026).
 
 ## Try it in two minutes
